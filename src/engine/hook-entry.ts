@@ -13,6 +13,7 @@ import { resolveRules } from './resolver.js';
 import { runRules } from './runner.js';
 import { recordPerfEntry } from './perf.js';
 import { formatPreToolUseOutput, formatPostToolUseOutput, formatStopOutput } from './output.js';
+import { isValidHookEvent } from '../utils/validation.js';
 
 // Import and register all built-in rules
 import '../rules/index.js';
@@ -23,6 +24,11 @@ import '../rules/index.js';
  */
 export async function executeHook(event: HookEvent): Promise<void> {
   try {
+    // 0. Validate event at runtime
+    if (!isValidHookEvent(event)) {
+      process.exit(0);
+    }
+
     // 1. Parse stdin
     const rawInput = parseStdinJson();
     if (!rawInput) {
@@ -68,8 +74,8 @@ export async function executeHook(event: HookEvent): Promise<void> {
       ruleCount: resolvedRules.length,
     });
 
-    // 7. Auto-sync to cloud on Stop events
-    if (event === 'Stop') {
+    // 7. Auto-sync to cloud on Stop events (requires explicit opt-in)
+    if (event === 'Stop' && config.cloud?.autoSync === true) {
       triggerCloudSync(process.cwd());
     }
 
@@ -94,10 +100,6 @@ export async function executeHook(event: HookEvent): Promise<void> {
   }
 }
 
-/**
- * Trigger cloud sync in the background if autoSync is enabled.
- * Non-blocking, fail-open — errors are silently ignored.
- */
 /**
  * Trigger cloud sync in the background if autoSync is enabled.
  * Non-blocking, fire-and-forget — errors are silently ignored.

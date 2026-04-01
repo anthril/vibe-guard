@@ -2,6 +2,7 @@ import type { VibeCheckPlugin } from '../types.js';
 import { registerRule } from '../engine/registry.js';
 import { registerPreset } from '../config/presets.js';
 import { validatePlugin } from './validator.js';
+import { isValidNpmPackageName } from '../utils/validation.js';
 
 /** Result of loading plugins */
 export interface PluginLoadResult {
@@ -26,6 +27,11 @@ export async function loadPlugins(pluginNames: string[]): Promise<PluginLoadResu
   };
 
   for (const name of pluginNames) {
+    if (!isValidNpmPackageName(name)) {
+      result.errors.push({ plugin: name, error: `Invalid plugin name: "${name}"` });
+      continue;
+    }
+
     try {
       const plugin = await importPlugin(name);
       const validation = validatePlugin(plugin, name);

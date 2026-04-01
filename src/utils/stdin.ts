@@ -1,12 +1,27 @@
-import { readFileSync } from 'node:fs';
+import { readSync } from 'node:fs';
+
+/** Maximum stdin size (2 MB) to prevent memory exhaustion */
+const MAX_STDIN_BYTES = 2 * 1024 * 1024;
 
 /**
- * Read all data from stdin as a string.
+ * Read data from stdin with a size limit.
  * Returns empty string if stdin is not available or has no data.
+ * Reads at most MAX_STDIN_BYTES (2 MB) to prevent DoS via large payloads.
  */
 export function readStdinSync(): string {
   try {
-    return readFileSync(0, 'utf-8');
+    const buf = Buffer.alloc(MAX_STDIN_BYTES);
+    let offset = 0;
+    let bytesRead: number;
+    do {
+      try {
+        bytesRead = readSync(0, buf, offset, Math.min(4096, MAX_STDIN_BYTES - offset), null);
+      } catch {
+        break;
+      }
+      offset += bytesRead;
+    } while (bytesRead > 0 && offset < MAX_STDIN_BYTES);
+    return buf.toString('utf-8', 0, offset);
   } catch {
     return '';
   }

@@ -1,5 +1,6 @@
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { isNewerVersion } from '../utils/semver.js';
+import { isValidNpmPackageName } from '../utils/validation.js';
 
 /** Version information for a package */
 export interface VersionInfo {
@@ -16,9 +17,14 @@ export function checkForUpdates(packages: string[]): VersionInfo[] {
   const results: VersionInfo[] = [];
 
   for (const pkg of packages) {
+    if (!isValidNpmPackageName(pkg)) {
+      results.push({ name: pkg, current: 'unknown', latest: 'unknown', hasUpdate: false });
+      continue;
+    }
+
     try {
       // Get current installed version
-      const currentRaw = execSync(`npm list ${pkg} --depth=0 --json`, {
+      const currentRaw = execFileSync('npm', ['list', pkg, '--depth=0', '--json'], {
         encoding: 'utf-8',
         timeout: 10000,
         stdio: ['pipe', 'pipe', 'pipe'],
@@ -27,7 +33,7 @@ export function checkForUpdates(packages: string[]): VersionInfo[] {
       const current = currentData.dependencies?.[pkg]?.version ?? 'unknown';
 
       // Get latest version from registry
-      const latestRaw = execSync(`npm view ${pkg} version`, {
+      const latestRaw = execFileSync('npm', ['view', pkg, 'version'], {
         encoding: 'utf-8',
         timeout: 10000,
         stdio: ['pipe', 'pipe', 'pipe'],

@@ -62,12 +62,18 @@ export async function upgradeCommand(options: {
 
   // Apply updates
   console.log('\n  Updating packages...\n');
-  const { execSync } = await import('node:child_process');
+  const { execFileSync } = await import('node:child_process');
+  const { isValidNpmPackageName } = await import('../../utils/validation.js');
 
   for (const update of available) {
+    if (!isValidNpmPackageName(update.name)) {
+      console.error(`    Skipping "${update.name}": invalid package name`);
+      continue;
+    }
+
     try {
       console.log(`    Updating ${update.name}...`);
-      execSync(`npm install ${update.name}@latest`, {
+      execFileSync('npm', ['install', `${update.name}@${update.latest}`], {
         encoding: 'utf-8',
         timeout: 60000,
         stdio: ['pipe', 'pipe', 'pipe'],

@@ -35,9 +35,12 @@ export function readCredentials(): CloudCredentials | null {
  */
 export function writeCredentials(credentials: CloudCredentials): void {
   if (!existsSync(CREDENTIALS_DIR)) {
-    mkdirSync(CREDENTIALS_DIR, { recursive: true });
+    mkdirSync(CREDENTIALS_DIR, { recursive: true, mode: 0o700 });
   }
-  writeFileSync(CREDENTIALS_FILE, JSON.stringify(credentials, null, 2), 'utf-8');
+  writeFileSync(CREDENTIALS_FILE, JSON.stringify(credentials, null, 2), {
+    encoding: 'utf-8',
+    mode: 0o600,
+  });
 }
 
 /**

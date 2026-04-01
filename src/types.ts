@@ -188,6 +188,8 @@ export interface ResolvedConfig {
   agents: AgentType[];
   /** Resolved rule configurations keyed by rule ID */
   rules: Map<string, ResolvedRuleConfig>;
+  /** Cloud sync settings (optional, passed through from user config) */
+  cloud?: CloudConfig;
 }
 
 // ─── Preset ─────────────────────────────────────────────────────────────────

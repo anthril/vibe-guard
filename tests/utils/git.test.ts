@@ -1,13 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
 
-// Mock execSync to avoid real git operations
+// Mock execFileSync to avoid real git operations
 vi.mock('node:child_process', () => ({
-  execSync: vi.fn((cmd: string) => {
-    if (cmd.includes('branch --show-current')) return 'main\n';
-    if (cmd.includes('rev-parse --show-toplevel')) return '/project\n';
-    if (cmd.includes('status --porcelain')) return 'M src/index.ts\n';
-    if (cmd.includes('rev-list --count')) return '3\n';
-    if (cmd.includes('rev-parse --abbrev-ref')) return 'origin/main\n';
+  execFileSync: vi.fn((_cmd: string, args: string[]) => {
+    const joined = args.join(' ');
+    if (joined.includes('branch --show-current')) return 'main\n';
+    if (joined.includes('rev-parse --show-toplevel')) return '/project\n';
+    if (joined.includes('status --porcelain')) return 'M src/index.ts\n';
+    if (joined.includes('rev-list --count')) return '3\n';
+    if (joined.includes('rev-parse --abbrev-ref')) return 'origin/main\n';
     throw new Error('unknown command');
   }),
 }));

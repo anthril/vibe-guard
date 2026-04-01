@@ -31,7 +31,7 @@ export function bundleHookScript(event: HookEvent, config: ResolvedConfig): stri
 // Generated: ${new Date().toISOString()}
 
 const fs = require('fs');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const path = require('path');
 
 // Embedded resolved config
@@ -49,15 +49,15 @@ const toolName = data.tool_name || '';
 const toolInput = data.tool_input || {};
 const filePath = toolInput.file_path || toolInput.path || '';
 
-// Git context
+// Git context (uses execFileSync to prevent shell injection)
 function gitCmd(args, cwd) {
   try {
-    return execSync('git ' + args, { cwd, timeout: 5000, encoding: 'utf-8' }).trim();
+    return execFileSync('git', args, { cwd, timeout: 5000, encoding: 'utf-8' }).toString().trim();
   } catch { return null; }
 }
 
-const repoRoot = filePath ? gitCmd('rev-parse --show-toplevel', path.dirname(filePath)) : null;
-const branch = repoRoot ? gitCmd('branch --show-current', repoRoot) : null;
+const repoRoot = filePath ? gitCmd(['rev-parse', '--show-toplevel'], path.dirname(filePath)) : null;
+const branch = repoRoot ? gitCmd(['branch', '--show-current'], repoRoot) : null;
 
 // Run rules
 const issues = [];

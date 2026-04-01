@@ -1,6 +1,6 @@
 import { writeFile, mkdir } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
-import type { ResolvedConfig, ResolvedRuleConfig } from '../types.js';
+import type { CloudConfig, ResolvedConfig, ResolvedRuleConfig } from '../types.js';
 
 /** Path for pre-compiled config cache (relative to project root) */
 const CACHE_PATH = '.vibecheck/cache/resolved-config.json';
@@ -10,6 +10,7 @@ interface SerializedConfig {
   presets: string[];
   agents: string[];
   rules: Record<string, ResolvedRuleConfig>;
+  cloud?: CloudConfig;
 }
 
 /**
@@ -25,6 +26,7 @@ export function serializeConfig(config: ResolvedConfig): SerializedConfig {
     presets: config.presets,
     agents: config.agents,
     rules,
+    cloud: config.cloud,
   };
 }
 
@@ -40,6 +42,7 @@ export function deserializeConfig(serialized: SerializedConfig): ResolvedConfig 
     presets: serialized.presets,
     agents: serialized.agents as ResolvedConfig['agents'],
     rules,
+    cloud: serialized.cloud,
   };
 }
 

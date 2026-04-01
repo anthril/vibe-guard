@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { dirname } from 'node:path';
 import { normalizePath } from './path.js';
 import type { GitContext } from '../types.js';
@@ -8,6 +8,8 @@ const DEFAULT_TIMEOUT_MS = 5000;
 /**
  * Run a git command and return the trimmed output.
  * Returns null on any error (not a git repo, command fails, timeout).
+ *
+ * Uses execFileSync (no shell) to prevent command injection via arguments.
  */
 export function gitCommand(
   args: string[],
@@ -15,7 +17,7 @@ export function gitCommand(
   timeoutMs = DEFAULT_TIMEOUT_MS,
 ): string | null {
   try {
-    const result = execSync(`git ${args.join(' ')}`, {
+    const result = execFileSync('git', args, {
       cwd,
       timeout: timeoutMs,
       encoding: 'utf-8',

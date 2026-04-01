@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **Fix command injection in upgrade checker**: Replace `execSync` template strings with `execFileSync` array arguments in `upgrade/checker.ts` — prevents shell metacharacter injection via plugin names
+- **Fix command injection in upgrade apply**: Replace `execSync` with `execFileSync` in `cli/commands/upgrade.ts` and pin to exact resolved version instead of `@latest`
+- **Fix shell injection in git utilities**: Replace `execSync` string concatenation with `execFileSync` array arguments in `utils/git.ts` — eliminates shell interpretation entirely
+- **Fix shell injection in ejected hooks**: Generated self-contained scripts now use `execFileSync` with array arguments instead of string concatenation
+- **Add npm package name validation**: Plugin names are validated against the npm naming spec (`/^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/`) in config schema, plugin loader, and upgrade checker
+- **Harden stdin parsing**: Stdin reads are now capped at 2 MB to prevent memory exhaustion from oversized payloads
+- **Require explicit cloud sync opt-in**: Auto-sync on Stop events now requires `cloud.autoSync: true` in config — having `VIBECHECK_API_KEY` set alone no longer triggers telemetry
+- **Restrict credential file permissions**: `~/.vibecheck/credentials.json` is now written with mode `0o600` and the directory with `0o700`
+- **Add runtime hook event validation**: `executeHook()` validates the event string against known values before processing, preventing template injection
+- **Validate file paths before git commands**: Paths from stdin tool input are checked for shell metacharacters before being passed to git context building
+
+### Added
+
+- New shared validation module (`utils/validation.ts`) with `isValidNpmPackageName`, `isValidFilePath`, and `isValidHookEvent` utilities
+- `cloud` field on `ResolvedConfig` type — cloud settings are now preserved through config compilation and deserialization
+
 ## [1.0.0] - 2026-04-01
 
 First stable release.

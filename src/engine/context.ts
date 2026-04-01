@@ -1,5 +1,6 @@
 import type { HookContext, HookEvent, ResolvedConfig } from '../types.js';
 import { buildGitContext } from '../utils/git.js';
+import { isValidFilePath } from '../utils/validation.js';
 
 /**
  * Raw hook input from Claude Code (JSON parsed from stdin).
@@ -21,12 +22,13 @@ export function buildHookContext(
   const tool = rawInput.tool_name ?? '';
   const toolInput = rawInput.tool_input ?? {};
 
-  // Extract file path for git context
-  const filePath =
+  // Extract file path for git context, validating it does not contain shell metacharacters
+  const rawFilePath =
     (toolInput.file_path as string) ??
     (toolInput.path as string) ??
-    (toolInput.command as string) ??
-    process.cwd();
+    '';
+
+  const filePath = rawFilePath && isValidFilePath(rawFilePath) ? rawFilePath : process.cwd();
 
   const gitContext = buildGitContext(filePath);
 

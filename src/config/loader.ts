@@ -152,6 +152,7 @@ export function resolveConfig(
     presets: presetNames,
     agents: config.agents ?? DEFAULT_CONFIG.agents,
     rules,
+    cloud: config.cloud,
   };
 }
 

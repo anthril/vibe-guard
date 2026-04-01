@@ -45,13 +45,16 @@ export const monorepoConfigSchema = z
   })
   .optional();
 
+/** Valid npm package name pattern (scoped or unscoped) */
+const npmPackageNamePattern = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
+
 /** Schema for the complete user config (vibecheck.config.ts) */
 export const vibeCheckConfigSchema = z.object({
   profile: z.enum(['strict', 'standard', 'relaxed', 'audit']).optional(),
   presets: z.array(z.string()).optional(),
   agents: z.array(z.enum(['claude-code', 'cursor', 'codex', 'opencode'])).optional(),
   rules: z.record(z.string(), ruleConfigSchema).optional(),
-  plugins: z.array(z.string()).optional(),
+  plugins: z.array(z.string().regex(npmPackageNamePattern, 'Invalid npm package name')).optional(),
   learn: learnConfigSchema,
   cloud: cloudConfigSchema,
   monorepo: monorepoConfigSchema,

@@ -15,7 +15,7 @@ export default defineConfig([
     target: 'node20',
     shims: true,
   },
-  // CLI — with shebang
+  // CLI — CJS with shebang for bin entrypoint, ESM without shebang
   {
     entry: {
       cli: 'src/cli/index.ts',
@@ -27,8 +27,5 @@ export default defineConfig([
     sourcemap: true,
     target: 'node20',
     shims: true,
-    banner: {
-      js: '#!/usr/bin/env node',
-    },
   },
 ]);

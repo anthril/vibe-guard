@@ -3,7 +3,6 @@ coverage/
 node_modules/
 package-lock.json
 .vibecheck/
-.claude/plans/
+.claude/
 *.yml
 *.yaml
-vibecheck-project-plan.md

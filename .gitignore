@@ -32,8 +32,11 @@ Desktop.ini
 .env.*
 !.env.example
 
-# Claude Code (local settings only)
-.claude/settings.local.json
+# Claude Code
+.claude/
+
+# Project plan (private)
+vibecheck-project-plan.md
 
 # Logs
 *.log

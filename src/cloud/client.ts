@@ -1,4 +1,4 @@
-import { readCredentials } from './credentials.js';
+import { readCredentials, getValidCredentials } from './credentials.js';
 
 const DEFAULT_API_URL = process.env.VIBECHECK_CLOUD_URL ?? 'https://api.vibecheck.dev';
 
@@ -15,13 +15,17 @@ export interface CloudApiError {
 
 /**
  * Lightweight HTTP client for the VibeCheck Cloud API.
+ * Reads API URL from: options > credentials.apiUrl > VIBECHECK_CLOUD_URL env > default.
+ * Auto-refreshes expired access tokens when a refresh token is stored.
  */
 export class CloudClient {
   private apiUrl: string;
   private apiKey?: string;
 
   constructor(options: CloudClientOptions = {}) {
-    this.apiUrl = (options.apiUrl ?? DEFAULT_API_URL).replace(/\/$/, '');
+    const creds = readCredentials();
+    const url = options.apiUrl ?? creds?.apiUrl ?? DEFAULT_API_URL;
+    this.apiUrl = url.replace(/\/$/, '');
     this.apiKey = options.apiKey;
   }
 
@@ -74,9 +78,9 @@ export class CloudClient {
   }
 
   private async authenticatedRequest(path: string, init?: RequestInit): Promise<unknown> {
-    const credentials = readCredentials();
+    const credentials = await getValidCredentials();
     if (!credentials) {
-      throw new Error('Not logged in. Run `vibecheck cloud login` first.');
+      throw new Error('Not logged in or session expired. Run `npx vibecheck cloud login` first.');
     }
 
     return this.request(path, {
@@ -91,7 +95,18 @@ export class CloudClient {
 
   private async request(path: string, init?: RequestInit): Promise<unknown> {
     const url = `${this.apiUrl}${path}`;
-    const res = await fetch(url, init);
+
+    let res: Response;
+    try {
+      res = await fetch(url, init);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Network error';
+      throw new Error(
+        `Cannot reach ${this.apiUrl} — ${message}. ` +
+          'Set VIBECHECK_CLOUD_URL or run `npx vibecheck cloud login` to configure.',
+        { cause: err },
+      );
+    }
 
     if (!res.ok) {
       let error: CloudApiError;

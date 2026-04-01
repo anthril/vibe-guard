@@ -123,11 +123,23 @@ const cloud = program
 cloud
   .command('login')
   .description('Authenticate with VibeCheck Cloud')
-  .option('--token <token>', 'Provide auth token directly')
-  .action(async (options: { token?: string }) => {
-    const { cloudLoginCommand } = await import('./commands/cloud-login.js');
-    await cloudLoginCommand(options);
-  });
+  .option('--token <token>', 'Supabase access token (JWT)')
+  .option('--refresh-token <token>', 'Supabase refresh token (for auto-renewal)')
+  .option('--url <url>', 'Cloud API URL (e.g. http://localhost:3000)')
+  .option('--supabase-url <url>', 'Supabase project URL (for token refresh)')
+  .option('--supabase-anon-key <key>', 'Supabase anon key (for token refresh)')
+  .action(
+    async (options: {
+      token?: string;
+      refreshToken?: string;
+      url?: string;
+      supabaseUrl?: string;
+      supabaseAnonKey?: string;
+    }) => {
+      const { cloudLoginCommand } = await import('./commands/cloud-login.js');
+      await cloudLoginCommand(options);
+    },
+  );
 
 cloud
   .command('logout')

@@ -6,19 +6,24 @@ const CREDENTIALS_DIR = join(homedir(), '.vibecheck');
 const CREDENTIALS_FILE = join(CREDENTIALS_DIR, 'credentials.json');
 
 export interface CloudCredentials {
-  /** OAuth access token */
+  /** Supabase access token (JWT) */
   accessToken: string;
-  /** Token refresh token */
+  /** Supabase refresh token — used to get new access tokens when expired */
   refreshToken?: string;
   /** Token expiry timestamp (ISO 8601) */
   expiresAt?: string;
   /** User email */
   email?: string;
+  /** Cloud API URL (stored so CLI knows where to connect) */
+  apiUrl?: string;
+  /** Supabase project URL (needed for token refresh) */
+  supabaseUrl?: string;
+  /** Supabase anon/publishable key (needed for token refresh) */
+  supabaseAnonKey?: string;
 }
 
 /**
  * Read stored Cloud credentials.
- * Returns null if no credentials are stored.
  */
 export function readCredentials(): CloudCredentials | null {
   try {
@@ -57,18 +62,74 @@ export function clearCredentials(): void {
 }
 
 /**
- * Check if credentials exist and are not expired.
+ * Check if credentials exist (does NOT check expiry — use refreshIfNeeded instead).
  */
 export function hasValidCredentials(): boolean {
   const creds = readCredentials();
-  if (!creds) return false;
+  return !!creds?.accessToken;
+}
 
-  if (creds.expiresAt) {
-    const expiry = new Date(creds.expiresAt);
-    if (expiry <= new Date()) return false;
+/**
+ * Check if the access token is expired.
+ */
+export function isTokenExpired(creds: CloudCredentials): boolean {
+  if (!creds.expiresAt) return false;
+  return new Date(creds.expiresAt) <= new Date();
+}
+
+/**
+ * Refresh the access token using the stored refresh token.
+ * Updates credentials on disk if successful.
+ * Returns the updated credentials or null if refresh fails.
+ */
+export async function refreshAccessToken(): Promise<CloudCredentials | null> {
+  const creds = readCredentials();
+  if (!creds?.refreshToken || !creds.supabaseUrl || !creds.supabaseAnonKey) return null;
+
+  try {
+    const res = await fetch(`${creds.supabaseUrl}/auth/v1/token?grant_type=refresh_token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: creds.supabaseAnonKey },
+      body: JSON.stringify({ refresh_token: creds.refreshToken }),
+    });
+
+    if (!res.ok) return null;
+
+    const data = (await res.json()) as {
+      access_token: string;
+      refresh_token: string;
+      expires_in: number;
+      user?: { email?: string };
+    };
+
+    const updated: CloudCredentials = {
+      ...creds,
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token,
+      expiresAt: new Date(Date.now() + data.expires_in * 1000).toISOString(),
+      email: data.user?.email ?? creds.email,
+    };
+
+    writeCredentials(updated);
+    return updated;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Get valid credentials, refreshing the token if expired.
+ * Returns null if no credentials or refresh fails.
+ */
+export async function getValidCredentials(): Promise<CloudCredentials | null> {
+  const creds = readCredentials();
+  if (!creds) return null;
+
+  if (isTokenExpired(creds) && creds.refreshToken) {
+    return refreshAccessToken();
   }
 
-  return !!creds.accessToken;
+  return creds;
 }
 
 export function getCredentialsPath(): string {

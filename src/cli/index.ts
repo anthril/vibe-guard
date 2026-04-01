@@ -141,7 +141,9 @@ cloud
   .command('connect')
   .description('Register current repository with VibeCheck Cloud')
   .option('--name <name>', 'Project name (defaults to directory name)')
-  .action(async (options: { name?: string }) => {
+  .option('--key <key>', 'Use an existing project API key (skip login)')
+  .option('--project-id <id>', 'Project ID (required with --key)')
+  .action(async (options: { name?: string; key?: string; projectId?: string }) => {
     const { cloudConnectCommand } = await import('./commands/cloud-connect.js');
     await cloudConnectCommand(options);
   });

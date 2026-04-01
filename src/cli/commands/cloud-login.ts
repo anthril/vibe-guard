@@ -17,7 +17,7 @@ export async function cloudLoginCommand(options: { token?: string } = {}): Promi
     });
     console.log(`  Credentials saved to ${getCredentialsPath()}`);
     console.log('  You are now logged in to VibeCheck Cloud.\n');
-    console.log('  Next step: run `vibecheck cloud connect` to register this project.\n');
+    console.log('  Next step: run `npx vibecheck cloud connect` to register this project.\n');
     return;
   }
 

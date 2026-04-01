@@ -53,10 +53,7 @@ export function getUnsyncedRecords(
 /**
  * Apply excludePaths patterns to strip file paths from records.
  */
-export function applyExclusions(
-  records: RuleHitRecord[],
-  excludePaths: string[],
-): RuleHitRecord[] {
+export function applyExclusions(records: RuleHitRecord[], excludePaths: string[]): RuleHitRecord[] {
   if (excludePaths.length === 0) return records;
 
   return records.map((record) => {

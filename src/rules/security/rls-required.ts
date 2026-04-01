@@ -27,7 +27,8 @@ export const rlsRequired: Rule = {
     if (!normalized.endsWith('.sql')) return { status: 'pass', ruleId };
 
     // Find CREATE TABLE statements
-    const createTablePattern = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:(?:"[^"]+"|[\w.]+)\.)?(?:"([^"]+)"|(\w+))/gi;
+    const createTablePattern =
+      /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:(?:"[^"]+"|[\w.]+)\.)?(?:"([^"]+)"|(\w+))/gi;
     const tables: string[] = [];
     let match;
 
@@ -39,7 +40,8 @@ export const rlsRequired: Rule = {
     if (tables.length === 0) return { status: 'pass', ruleId };
 
     // Check if RLS is enabled for each table
-    const rlsPattern = /ALTER\s+TABLE\s+(?:(?:"[^"]+"|[\w.]+)\.)?(?:"([^"]+)"|(\w+))\s+ENABLE\s+ROW\s+LEVEL\s+SECURITY/gi;
+    const rlsPattern =
+      /ALTER\s+TABLE\s+(?:(?:"[^"]+"|[\w.]+)\.)?(?:"([^"]+)"|(\w+))\s+ENABLE\s+ROW\s+LEVEL\s+SECURITY/gi;
     const rlsEnabledTables = new Set<string>();
 
     while ((match = rlsPattern.exec(content)) !== null) {
@@ -54,9 +56,7 @@ export const rlsRequired: Rule = {
         status: 'warn',
         ruleId,
         message: `Table${missingRls.length > 1 ? 's' : ''} missing RLS: ${missingRls.join(', ')}. Row Level Security should be enabled on all tables.`,
-        fix: missingRls
-          .map((t) => `ALTER TABLE ${t} ENABLE ROW LEVEL SECURITY;`)
-          .join('\n'),
+        fix: missingRls.map((t) => `ALTER TABLE ${t} ENABLE ROW LEVEL SECURITY;`).join('\n'),
         metadata: { tables, missingRls },
       };
     }

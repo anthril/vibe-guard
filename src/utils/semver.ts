@@ -17,7 +17,10 @@ interface ParsedVersion {
  * Returns null if the string is not a valid semver.
  */
 export function parseSemver(version: string): ParsedVersion | null {
-  const match = version.trim().replace(/^v/, '').match(/^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$/);
+  const match = version
+    .trim()
+    .replace(/^v/, '')
+    .match(/^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$/);
   if (!match) return null;
 
   return {

@@ -107,6 +107,8 @@ export async function fixCommand(options: { dryRun?: boolean } = {}): Promise<vo
   } else if (fixesApplied > 0) {
     console.log(`  Applied ${fixesApplied} autofix${fixesApplied !== 1 ? 'es' : ''}.\n`);
   } else {
-    console.log(`  ${scanResult.issues.length} issue${scanResult.issues.length !== 1 ? 's' : ''} found but no autofixes available.\n`);
+    console.log(
+      `  ${scanResult.issues.length} issue${scanResult.issues.length !== 1 ? 's' : ''} found but no autofixes available.\n`,
+    );
   }
 }

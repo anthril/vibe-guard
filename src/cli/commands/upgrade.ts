@@ -2,10 +2,7 @@ import { checkForUpdates } from '../../upgrade/checker.js';
 import { discoverConfigFile, readRawConfig } from '../../config/discovery.js';
 import type { VibeCheckConfig } from '../../types.js';
 
-export async function upgradeCommand(options: {
-  check?: boolean;
-  apply?: boolean;
-}): Promise<void> {
+export async function upgradeCommand(options: { check?: boolean; apply?: boolean }): Promise<void> {
   const projectRoot = process.cwd();
 
   console.log('\n  VibeCheck Upgrade\n');

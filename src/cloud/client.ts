@@ -46,7 +46,10 @@ export class CloudClient {
    * Register a project with Cloud.
    * Returns the generated API key (shown once).
    */
-  async connectProject(name: string, repoUrl?: string): Promise<{ projectId: string; apiKey: string }> {
+  async connectProject(
+    name: string,
+    repoUrl?: string,
+  ): Promise<{ projectId: string; apiKey: string }> {
     return this.authenticatedRequest('/api/v1/projects', {
       method: 'POST',
       body: JSON.stringify({ name, repoUrl }),

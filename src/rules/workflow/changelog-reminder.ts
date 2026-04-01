@@ -32,16 +32,12 @@ export const changelogReminder: Rule = {
     if (changedFiles.length === 0) return { status: 'pass', ruleId };
 
     // Check if CHANGELOG.md was already modified
-    const changelogModified = changedFiles.some(
-      (f) => f.toLowerCase() === 'changelog.md',
-    );
+    const changelogModified = changedFiles.some((f) => f.toLowerCase() === 'changelog.md');
     if (changelogModified) return { status: 'pass', ruleId };
 
     // Check for significant changes
     const hasMigrations = changedFiles.some(
-      (f) =>
-        f.toLowerCase().includes('migration') ||
-        f.toLowerCase().includes('/migrations/'),
+      (f) => f.toLowerCase().includes('migration') || f.toLowerCase().includes('/migrations/'),
     );
     const isSignificant = changedFiles.length > 5 || hasMigrations;
 

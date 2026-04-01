@@ -14,10 +14,12 @@ import type { VibeCheckConfig, HookEvent, ResolvedConfig } from '../../types.js'
 
 const HOOK_EVENTS: HookEvent[] = ['PreToolUse', 'PostToolUse', 'Stop'];
 
-export async function ejectCommand(options: {
-  adapter?: string;
-  output?: string;
-} = {}): Promise<void> {
+export async function ejectCommand(
+  options: {
+    adapter?: string;
+    output?: string;
+  } = {},
+): Promise<void> {
   const projectRoot = process.cwd();
   const adapter = options.adapter ?? 'claude-code';
   const outputDir = options.output ?? join('.vibecheck', 'ejected');
@@ -40,11 +42,7 @@ export async function ejectCommand(options: {
   // Generate bundled hook scripts
   for (const event of HOOK_EVENTS) {
     const script = bundleHookScript(event, resolvedConfig);
-    const scriptPath = join(
-      projectRoot,
-      outputDir,
-      `vibecheck-${event.toLowerCase()}.js`,
-    );
+    const scriptPath = join(projectRoot, outputDir, `vibecheck-${event.toLowerCase()}.js`);
     await mkdir(dirname(scriptPath), { recursive: true });
     await writeFile(scriptPath, script, 'utf-8');
     console.log(`  Created ${scriptPath}`);

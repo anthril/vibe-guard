@@ -25,9 +25,23 @@ export const todoTracker: Rule = {
     // Only check source files
     const ext = filePath.split('.').pop()?.toLowerCase() ?? '';
     const sourceExts = [
-      'ts', 'tsx', 'js', 'jsx', 'mts', 'mjs',
-      'py', 'rb', 'go', 'rs', 'java', 'kt',
-      'vue', 'svelte', 'astro', 'css', 'scss',
+      'ts',
+      'tsx',
+      'js',
+      'jsx',
+      'mts',
+      'mjs',
+      'py',
+      'rb',
+      'go',
+      'rs',
+      'java',
+      'kt',
+      'vue',
+      'svelte',
+      'astro',
+      'css',
+      'scss',
     ];
     if (!sourceExts.includes(ext)) return { status: 'pass', ruleId };
 

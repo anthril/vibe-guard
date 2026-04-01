@@ -23,10 +23,7 @@ export function buildHookContext(
   const toolInput = rawInput.tool_input ?? {};
 
   // Extract file path for git context, validating it does not contain shell metacharacters
-  const rawFilePath =
-    (toolInput.file_path as string) ??
-    (toolInput.path as string) ??
-    '';
+  const rawFilePath = (toolInput.file_path as string) ?? (toolInput.path as string) ?? '';
 
   const filePath = rawFilePath && isValidFilePath(rawFilePath) ? rawFilePath : process.cwd();
 

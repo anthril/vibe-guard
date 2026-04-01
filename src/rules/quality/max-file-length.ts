@@ -30,9 +30,21 @@ export const maxFileLength: Rule = {
     // Skip non-source files
     const ext = filePath.split('.').pop()?.toLowerCase() ?? '';
     const sourceExts = [
-      'ts', 'tsx', 'js', 'jsx', 'mts', 'mjs',
-      'py', 'rb', 'go', 'rs', 'java', 'kt',
-      'vue', 'svelte', 'astro',
+      'ts',
+      'tsx',
+      'js',
+      'jsx',
+      'mts',
+      'mjs',
+      'py',
+      'rb',
+      'go',
+      'rs',
+      'java',
+      'kt',
+      'vue',
+      'svelte',
+      'astro',
     ];
     if (!sourceExts.includes(ext)) return { status: 'pass', ruleId };
 

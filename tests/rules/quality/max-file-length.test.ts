@@ -62,7 +62,10 @@ describe('quality/max-file-length', () => {
       presets: [],
       agents: ['claude-code'],
       rules: new Map([
-        ['quality/max-file-length', { enabled: true, severity: 'warn', options: { maxLines: 200 } }],
+        [
+          'quality/max-file-length',
+          { enabled: true, severity: 'warn', options: { maxLines: 200 } },
+        ],
       ]),
     };
 

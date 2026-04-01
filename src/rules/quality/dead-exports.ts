@@ -48,7 +48,12 @@ export const deadExports: Rule = {
     // Also check for `export { name }` syntax
     const reexportPattern = /export\s*\{([^}]+)\}/g;
     while ((match = reexportPattern.exec(content)) !== null) {
-      const names = match[1].split(',').map((s) => s.trim().split(/\s+as\s+/)[0].trim());
+      const names = match[1].split(',').map((s) =>
+        s
+          .trim()
+          .split(/\s+as\s+/)[0]
+          .trim(),
+      );
       exports.push(...names.filter(Boolean));
     }
 
@@ -101,9 +106,12 @@ export const deadExports: Rule = {
           const importNames = /import\s*\{([^}]+)\}\s*from/g;
           let impMatch;
           while ((impMatch = importNames.exec(source)) !== null) {
-            const names = impMatch[1]
-              .split(',')
-              .map((s) => s.trim().split(/\s+as\s+/)[0].trim());
+            const names = impMatch[1].split(',').map((s) =>
+              s
+                .trim()
+                .split(/\s+as\s+/)[0]
+                .trim(),
+            );
             names.forEach((n) => importedNames.add(n));
           }
         }

@@ -76,7 +76,20 @@ function detectFormatter(projectRoot: string, ext: string): FormatterInfo | null
   }
 
   // JS/TS/CSS/HTML → Check for Biome first, then Prettier
-  const webExts = ['ts', 'tsx', 'js', 'jsx', 'mts', 'mjs', 'css', 'scss', 'json', 'html', 'vue', 'svelte'];
+  const webExts = [
+    'ts',
+    'tsx',
+    'js',
+    'jsx',
+    'mts',
+    'mjs',
+    'css',
+    'scss',
+    'json',
+    'html',
+    'vue',
+    'svelte',
+  ];
   if (!webExts.includes(ext)) return null;
 
   // Biome
@@ -85,7 +98,16 @@ function detectFormatter(projectRoot: string, ext: string): FormatterInfo | null
   }
 
   // Prettier
-  const prettierConfigs = ['.prettierrc', '.prettierrc.json', '.prettierrc.js', '.prettierrc.cjs', 'prettier.config.js', 'prettier.config.cjs', '.prettierrc.yaml', '.prettierrc.yml'];
+  const prettierConfigs = [
+    '.prettierrc',
+    '.prettierrc.json',
+    '.prettierrc.js',
+    '.prettierrc.cjs',
+    'prettier.config.js',
+    'prettier.config.cjs',
+    '.prettierrc.yaml',
+    '.prettierrc.yml',
+  ];
   for (const config of prettierConfigs) {
     if (existsSync(join(projectRoot, config))) {
       return { name: 'Prettier', command: 'prettier --write' };

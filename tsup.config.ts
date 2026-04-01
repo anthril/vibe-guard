@@ -7,7 +7,7 @@ export default defineConfig({
     'hooks/runner': 'src/engine/hook-entry.ts',
   },
   format: ['esm', 'cjs'],
-  dts: true,
+  dts: false,
   clean: true,
   splitting: false,
   sourcemap: true,

@@ -46,14 +46,8 @@ export const secretDetection: Rule = {
       if (match) {
         const matchedValue = match[0];
 
-        // Check against allowlist
-        const isAllowed = allowPatterns.some((allow) => {
-          try {
-            return new RegExp(allow).test(matchedValue);
-          } catch {
-            return matchedValue.includes(allow);
-          }
-        });
+        // Check against allowlist (plain string matching — no regex interpretation)
+        const isAllowed = allowPatterns.some((allow) => matchedValue.includes(allow));
 
         if (isAllowed) continue;
 

@@ -21,8 +21,7 @@
     }
   },
   "files": [
-    "dist",
-    "templates"
+    "dist"
   ],
   "scripts": {
     "build": "tsup && tsc --emitDeclarationOnly --declaration --outDir dist",

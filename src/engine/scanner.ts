@@ -135,12 +135,14 @@ function walkDirectory(dir: string, exclude: string[]): string[] {
     const entries = readdirSync(dir);
     for (const entry of entries) {
       const fullPath = join(dir, entry);
-      const normalizedPath = normalizePath(fullPath) + '/';
 
-      // Check exclude
+      // Check exclude — match against directory/file name segments, not substrings
+      const entryLower = entry.toLowerCase();
       const isExcluded = exclude.some((pattern) => {
-        const normalizedPattern = pattern.toLowerCase();
-        return normalizedPath.toLowerCase().includes(normalizedPattern);
+        const cleanPattern = pattern.replace(/\/$/, '').toLowerCase();
+        // Match exact directory/file name to avoid false positives
+        // (e.g., exclude "node_modules" should not exclude "node-utils")
+        return entryLower === cleanPattern;
       });
       if (isExcluded) continue;
 

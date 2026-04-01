@@ -46,12 +46,13 @@ export async function runRules(
 
       const result = await rule.check(ruleContext);
 
-      // Apply severity override from config
-      if (config.severity && result.status !== 'pass') {
-        if (config.severity === 'warn' && result.status === 'block') {
-          result.status = 'warn';
-        } else if (config.severity === 'info') {
-          result.status = 'warn';
+      // Apply severity override from config — downgrade only, never upgrade
+      if (result.status !== 'pass') {
+        const severityRank = { info: 0, warn: 1, block: 2 };
+        const configRank = severityRank[config.severity];
+        const resultRank = severityRank[result.status];
+        if (configRank < resultRank) {
+          result.status = config.severity === 'info' ? 'warn' : config.severity;
         }
       }
 

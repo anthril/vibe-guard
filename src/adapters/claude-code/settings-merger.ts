@@ -42,7 +42,10 @@ export async function mergeSettings(
             if (Array.isArray(hooks)) {
               return !hooks.some((h) => {
                 const cmd = (h as Record<string, unknown>).command;
-                return typeof cmd === 'string' && cmd.includes('vibecheck');
+                return (
+                  typeof cmd === 'string' &&
+                  /vibecheck[-\s/\\]|\.vibecheck[/\\]/.test(cmd)
+                );
               });
             }
           }

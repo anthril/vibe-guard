@@ -41,14 +41,25 @@ export function resolveConfig(
 
   // 1. Apply presets in order (first declared = lowest priority)
   const presetNames = config.presets ?? DEFAULT_CONFIG.presets;
+  const unknownPresets: string[] = [];
   for (const presetName of presetNames) {
     const preset = presetMap?.get(presetName);
-    if (!preset) continue;
+    if (!preset) {
+      unknownPresets.push(presetName);
+      continue;
+    }
 
     for (const [ruleId, ruleConfig] of Object.entries(preset.rules)) {
       const resolved = normalizeRuleConfig(ruleConfig);
       rules.set(ruleId, resolved);
     }
+  }
+
+  if (unknownPresets.length > 0) {
+    throw new Error(
+      `Unknown preset${unknownPresets.length > 1 ? 's' : ''}: ${unknownPresets.join(', ')}. ` +
+        `Available presets: ${presetMap ? Array.from(presetMap.keys()).join(', ') : 'none registered'}`,
+    );
   }
 
   // 2. Apply user rules (highest priority — overrides presets)

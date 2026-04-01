@@ -68,7 +68,7 @@ export const SECRET_PATTERNS: Array<[string, RegExp, string]> = [
 export const DANGEROUS_COMMAND_PATTERNS: Array<[string, RegExp, string]> = [
   ['rm -rf /', /rm\s+-[a-zA-Z]*r[a-zA-Z]*f[a-zA-Z]*\s+\/(?!\w)/, 'Recursive force delete from root'],
   ['rm -rf ~', /rm\s+-[a-zA-Z]*r[a-zA-Z]*f[a-zA-Z]*\s+~/, 'Recursive force delete home directory'],
-  ['git push --force', /git\s+push\s+.*--force(?!-with-lease)/, 'Force push (use --force-with-lease instead)'],
+  ['git push --force', /git\s+push\s+.*(?:--force(?!-with-lease)|-f\b)/, 'Force push (use --force-with-lease instead)'],
   ['git reset --hard', /git\s+reset\s+--hard/, 'Hard reset (destroys uncommitted changes)'],
   ['git clean -fd', /git\s+clean\s+-[a-zA-Z]*f[a-zA-Z]*d/, 'Force clean untracked files and directories'],
   ['pipe to shell', /curl\s+.*\|\s*(?:ba)?sh/, 'Piping remote content to shell'],

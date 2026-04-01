@@ -40,7 +40,7 @@ export function resolveRules(
     if (rule.match?.tools && rule.match.tools.length > 0) {
       const toolMatches = rule.match.tools.some((pattern) => {
         // Support pipe-separated tool names like "Edit|Write"
-        const parts = pattern.split('|');
+        const parts = pattern.split('|').map((p) => p.trim());
         return parts.includes(tool);
       });
       if (!toolMatches) continue;

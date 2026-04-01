@@ -94,6 +94,12 @@ describe('resolveConfig', () => {
     ).toThrow('Invalid vibecheck config');
   });
 
+  it('should throw on unknown presets', () => {
+    expect(() =>
+      resolveConfig({ presets: ['nonexistent'] }, makePresetMap(testPreset)),
+    ).toThrow('Unknown preset');
+  });
+
   it('should support user-only rules (no preset)', () => {
     const config = resolveConfig({
       rules: { 'custom/my-rule': { severity: 'warn' } },

@@ -23,8 +23,9 @@ export function createEditVariant(writeRule: Rule): Rule {
       const oldString = context.toolInput.old_string as string | undefined;
       const newString = context.toolInput.new_string as string | undefined;
 
-      // If we don't have both strings, can't do comparison — pass through
-      if (!oldString || !newString) {
+      // If either string is missing (undefined), can't do comparison — pass through
+      // Note: empty string "" is valid (e.g., deleting all content or writing to empty file)
+      if (oldString === undefined || newString === undefined) {
         return { status: 'pass', ruleId: writeRule.id };
       }
 

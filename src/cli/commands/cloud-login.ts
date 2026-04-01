@@ -178,7 +178,6 @@ async function oauthPkceLogin(
 
       // Exchange code for tokens
       try {
-        const port = (server.address() as { port: number }).port;
         const tokenRes = await fetch(`${supabaseUrl}/auth/v1/oauth/token`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -187,7 +186,7 @@ async function oauthPkceLogin(
             code,
             code_verifier: codeVerifier,
             client_id: clientId,
-            redirect_uri: `http://localhost:${port}/callback`,
+            redirect_uri: 'http://localhost:3030/callback',
           }),
         });
 
@@ -224,9 +223,9 @@ async function oauthPkceLogin(
       }
     });
 
-    server.listen(0, () => {
-      const port = (server.address() as { port: number }).port;
-      const redirectUri = `http://localhost:${port}/callback`;
+    const CLI_CALLBACK_PORT = 3030;
+    server.listen(CLI_CALLBACK_PORT, () => {
+      const redirectUri = `http://localhost:${CLI_CALLBACK_PORT}/callback`;
 
       const authUrl = new URL(`${supabaseUrl}/auth/v1/oauth/authorize`);
       authUrl.searchParams.set('client_id', clientId);

@@ -20,6 +20,10 @@ export interface CloudCredentials {
   supabaseUrl?: string;
   /** Supabase anon/publishable key (needed for token refresh) */
   supabaseAnonKey?: string;
+  /** Project API key (vc_ prefix) for syncing rule hits */
+  apiKey?: string;
+  /** Connected project ID */
+  projectId?: string;
 }
 
 /**

@@ -105,13 +105,15 @@ export async function executeHook(event: HookEvent): Promise<void> {
  * Non-blocking, fire-and-forget — errors are silently ignored.
  */
 function triggerCloudSync(projectRoot: string): void {
-  // Check for API key in environment — skip everything if not set
-  const apiKey = process.env.VIBECHECK_API_KEY;
-  if (!apiKey) return;
+  // Check for API key in environment or stored credentials
+  import('../cloud/credentials.js')
+    .then(({ readCredentials }) => {
+      const apiKey = process.env.VIBECHECK_API_KEY ?? readCredentials()?.apiKey;
+      if (!apiKey) return;
 
-  // Fire-and-forget async sync
-  import('../cloud/sync.js')
-    .then(({ syncToCloud }) => syncToCloud(projectRoot, apiKey))
+      // Fire-and-forget async sync
+      return import('../cloud/sync.js').then(({ syncToCloud }) => syncToCloud(projectRoot, apiKey));
+    })
     .catch(() => {
       // Fail open — cloud sync errors should never impact the developer
     });

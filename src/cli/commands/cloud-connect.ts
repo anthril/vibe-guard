@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { hasValidCredentials } from '../../cloud/credentials.js';
+import { hasValidCredentials, readCredentials, writeCredentials } from '../../cloud/credentials.js';
 import { CloudClient } from '../../cloud/client.js';
 
 const CLOUD_URL = process.env.VIBECHECK_CLOUD_URL ?? 'https://app.vibecheck.dev';
@@ -55,12 +55,19 @@ export async function cloudConnectCommand(
     }
   }
 
+  // Save API key and project ID to credentials
+  const creds = readCredentials();
+  if (creds) {
+    writeCredentials({ ...creds, apiKey, projectId });
+    console.log('  Saved API key to credentials.');
+  }
+
   // Auto-update vibecheck.config.ts
   if (updateConfigFile(projectRoot, projectId)) {
     console.log('  Updated vibecheck.config.ts with cloud settings.');
   }
 
-  // Auto-write VIBECHECK_API_KEY to .env.local
+  // Also write to .env.local for Next.js / framework access
   if (updateEnvFile(projectRoot, apiKey)) {
     console.log('  Saved API key to .env.local');
   }

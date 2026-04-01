@@ -1,4 +1,5 @@
 import { syncToCloud } from '../../cloud/sync.js';
+import { readCredentials } from '../../cloud/credentials.js';
 
 /**
  * `vibecheck sync`
@@ -12,12 +13,11 @@ export async function syncCommand(
 
   console.log('\n  VibeCheck Cloud — Sync\n');
 
-  // Get API key from environment
-  const apiKey = process.env.VIBECHECK_API_KEY;
+  // Get API key from environment or stored credentials
+  const apiKey = process.env.VIBECHECK_API_KEY ?? readCredentials()?.apiKey;
   if (!apiKey) {
-    console.error('  VIBECHECK_API_KEY not set.');
-    console.error('  Run `vibecheck cloud connect` to get an API key,');
-    console.error('  then set it as an environment variable.\n');
+    console.error('  No API key found.');
+    console.error('  Run `npx vibecheck cloud connect` to register this project.\n');
     process.exit(1);
   }
 

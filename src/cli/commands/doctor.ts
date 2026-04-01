@@ -8,6 +8,7 @@ import { discoverConfigFile, readRawConfig } from '../../config/discovery.js';
 import { resolveConfig } from '../../config/loader.js';
 import { getAllPresets } from '../../config/presets.js';
 import { getAllRules } from '../../engine/registry.js';
+import { readPerfEntries, calculatePerfStats, PERF_BUDGET_MS } from '../../engine/perf.js';
 import type { VibeCheckConfig } from '../../types.js';
 
 interface CheckResult {
@@ -141,7 +142,26 @@ export async function doctorCommand(): Promise<void> {
     }
   }
 
-  // 7. Check node_modules
+  // 7. Check performance budget
+  const perfEntries = readPerfEntries(projectRoot);
+  if (perfEntries.length > 0) {
+    const stats = calculatePerfStats(perfEntries);
+    if (stats.p95Ms > PERF_BUDGET_MS) {
+      results.push({
+        name: 'Performance',
+        status: 'warn',
+        message: `Hook p95 is ${stats.p95Ms}ms (budget: ${PERF_BUDGET_MS}ms). ${stats.overBudgetPct}% of runs exceed budget.`,
+      });
+    } else {
+      results.push({
+        name: 'Performance',
+        status: 'pass',
+        message: `Hook p95 is ${stats.p95Ms}ms (budget: ${PERF_BUDGET_MS}ms) — ${stats.count} samples.`,
+      });
+    }
+  }
+
+  // 8. Check node_modules
   const vibecheckInModules = existsSync(join(projectRoot, 'node_modules', 'vibecheck'));
   if (!vibecheckInModules) {
     results.push({

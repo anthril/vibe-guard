@@ -11,6 +11,7 @@ import { loadCompiledConfig } from '../config/compile.js';
 import { buildHookContext } from './context.js';
 import { resolveRules } from './resolver.js';
 import { runRules } from './runner.js';
+import { recordPerfEntry } from './perf.js';
 import { formatPreToolUseOutput, formatPostToolUseOutput, formatStopOutput } from './output.js';
 
 // Import and register all built-in rules
@@ -54,10 +55,25 @@ export async function executeHook(event: HookEvent): Promise<void> {
       process.exit(0); // No matching rules
     }
 
-    // 6. Run rules
+    // 6. Run rules (with perf tracking)
+    const hookStart = Date.now();
     const result = await runRules(resolvedRules, context);
+    const hookDuration = Date.now() - hookStart;
 
-    // 7. Format and output
+    // Record perf data
+    recordPerfEntry(process.cwd(), {
+      event,
+      tool: toolName,
+      durationMs: hookDuration,
+      ruleCount: resolvedRules.length,
+    });
+
+    // 7. Auto-sync to cloud on Stop events
+    if (event === 'Stop') {
+      triggerCloudSync(process.cwd());
+    }
+
+    // 8. Format and output
     if (event === 'PreToolUse') {
       const output = formatPreToolUseOutput(result);
       if (output.stderr) process.stderr.write(output.stderr);
@@ -76,4 +92,25 @@ export async function executeHook(event: HookEvent): Promise<void> {
     // Fail open — never block on internal errors
     process.exit(0);
   }
+}
+
+/**
+ * Trigger cloud sync in the background if autoSync is enabled.
+ * Non-blocking, fail-open — errors are silently ignored.
+ */
+/**
+ * Trigger cloud sync in the background if autoSync is enabled.
+ * Non-blocking, fire-and-forget — errors are silently ignored.
+ */
+function triggerCloudSync(projectRoot: string): void {
+  // Check for API key in environment — skip everything if not set
+  const apiKey = process.env.VIBECHECK_API_KEY;
+  if (!apiKey) return;
+
+  // Fire-and-forget async sync
+  import('../cloud/sync.js')
+    .then(({ syncToCloud }) => syncToCloud(projectRoot, apiKey))
+    .catch(() => {
+      // Fail open — cloud sync errors should never impact the developer
+    });
 }

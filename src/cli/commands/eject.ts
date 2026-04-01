@@ -1,4 +1,5 @@
-import { writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, readFile, mkdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 
 import '../../presets/index.js';
@@ -13,8 +14,13 @@ import type { VibeCheckConfig, HookEvent, ResolvedConfig } from '../../types.js'
 
 const HOOK_EVENTS: HookEvent[] = ['PreToolUse', 'PostToolUse', 'Stop'];
 
-export async function ejectCommand(): Promise<void> {
+export async function ejectCommand(options: {
+  adapter?: string;
+  output?: string;
+} = {}): Promise<void> {
   const projectRoot = process.cwd();
+  const adapter = options.adapter ?? 'claude-code';
+  const outputDir = options.output ?? join('.vibecheck', 'ejected');
 
   console.log('\n  VibeCheck Eject — Exporting standalone hooks...\n');
   console.log('  WARNING: After ejecting, hooks will NOT receive updates.');
@@ -36,8 +42,7 @@ export async function ejectCommand(): Promise<void> {
     const script = bundleHookScript(event, resolvedConfig);
     const scriptPath = join(
       projectRoot,
-      '.vibecheck',
-      'ejected',
+      outputDir,
       `vibecheck-${event.toLowerCase()}.js`,
     );
     await mkdir(dirname(scriptPath), { recursive: true });
@@ -47,21 +52,65 @@ export async function ejectCommand(): Promise<void> {
 
   // Save frozen config
   const serialized = serializeConfig(resolvedConfig);
-  const configPath = join(projectRoot, '.vibecheck', 'ejected', 'frozen-config.json');
+  const configPath = join(projectRoot, outputDir, 'frozen-config.json');
   await writeFile(configPath, JSON.stringify(serialized, null, 2), 'utf-8');
   console.log(`  Created ${configPath}`);
 
   // Generate eject readme
-  const readmePath = join(projectRoot, '.vibecheck', 'ejected', 'VIBECHECK-EJECTED.md');
-  await writeFile(readmePath, generateEjectReadme(resolvedConfig), 'utf-8');
+  const readmePath = join(projectRoot, outputDir, 'VIBECHECK-EJECTED.md');
+  await writeFile(readmePath, generateEjectReadme(resolvedConfig, outputDir), 'utf-8');
   console.log(`  Created ${readmePath}`);
 
+  // Auto-update .claude/settings.json if adapter is claude-code
+  if (adapter === 'claude-code') {
+    await updateClaudeSettings(projectRoot, outputDir);
+  }
+
   console.log('\n  Ejected successfully.');
-  console.log('  Update .claude/settings.json to point to .vibecheck/ejected/ scripts.');
+  if (adapter === 'claude-code') {
+    console.log('  .claude/settings.json has been updated to use ejected hooks.');
+  }
   console.log('  You can now remove vibecheck from your dependencies.\n');
 }
 
-function generateEjectReadme(config: ResolvedConfig): string {
+async function updateClaudeSettings(projectRoot: string, outputDir: string): Promise<void> {
+  const settingsPath = join(projectRoot, '.claude', 'settings.json');
+
+  let settings: Record<string, unknown> = {};
+  if (existsSync(settingsPath)) {
+    try {
+      const raw = await readFile(settingsPath, 'utf-8');
+      settings = JSON.parse(raw);
+    } catch {
+      settings = {};
+    }
+  }
+
+  // Build hook entries pointing to ejected scripts
+  const hooks: Record<string, unknown[]> = {};
+  for (const event of HOOK_EVENTS) {
+    const scriptPath = join(outputDir, `vibecheck-${event.toLowerCase()}.js`);
+    hooks[event] = [
+      {
+        matcher: event === 'Stop' ? undefined : 'Edit|Write|Bash',
+        hooks: [
+          {
+            type: 'command',
+            command: `node ${scriptPath.replace(/\\/g, '/')}`,
+          },
+        ],
+      },
+    ];
+  }
+
+  settings.hooks = hooks;
+
+  await mkdir(dirname(settingsPath), { recursive: true });
+  await writeFile(settingsPath, JSON.stringify(settings, null, 2), 'utf-8');
+  console.log(`  Updated ${settingsPath}`);
+}
+
+function generateEjectReadme(config: ResolvedConfig, outputDir: string): string {
   const ruleCount = Array.from(config.rules.values()).filter((r) => r.enabled).length;
   return `# VibeCheck — Ejected Hooks
 
@@ -75,13 +124,15 @@ They do not require the \`vibecheck\` npm package to run.
 
 ## How to use
 
-Update your \`.claude/settings.json\` hooks to point to these scripts:
+Your \`.claude/settings.json\` has been updated to point to these scripts.
+
+Alternatively, configure manually:
 
 \`\`\`json
 {
   "hooks": {
     "PreToolUse": [{
-      "hooks": [{ "type": "command", "command": "node .vibecheck/ejected/vibecheck-pretooluse.js" }],
+      "hooks": [{ "type": "command", "command": "node ${outputDir.replace(/\\/g, '/')}/vibecheck-pretooluse.js" }],
       "matcher": "Edit|Write|Bash"
     }]
   }

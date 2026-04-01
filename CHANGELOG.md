@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-rc.1] - 2026-04-01
+
+### Added
+
+- **Cloud auto-sync**: Stop hook triggers `vibecheck sync` automatically when `VIBECHECK_API_KEY` is set
+- **Performance budget**: Hook execution timing recorded to `.vibecheck/data/perf.jsonl`, `vibecheck doctor` reports p95 vs 100ms budget
+- **Eject enhancements**: `--adapter` and `--output` flags, auto-updates `.claude/settings.json`
+- **Upgrade enhancements**: `--apply` flag, version diff display, major/minor/patch guidance
+
+### Changed
+
+- Coverage thresholds raised to 80% lines/statements, 75% functions, 70% branches
+- Version bumped to 1.0.0-rc.1
+
 ## [0.4.0-beta.0] - 2026-04-01
 
 ### Added

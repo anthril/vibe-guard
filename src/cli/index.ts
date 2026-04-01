@@ -91,16 +91,19 @@ program
 program
   .command('eject')
   .description('Export standalone hooks (removes vibecheck dependency)')
-  .action(async () => {
+  .option('--adapter <adapter>', 'Target adapter (default: claude-code)', 'claude-code')
+  .option('--output <dir>', 'Output directory (default: .vibecheck/ejected)')
+  .action(async (options: { adapter?: string; output?: string }) => {
     const { ejectCommand } = await import('./commands/eject.js');
-    await ejectCommand();
+    await ejectCommand(options);
   });
 
 program
   .command('upgrade')
   .description('Check for and apply updates to vibecheck and plugins')
   .option('--check', 'Only check for updates, do not apply')
-  .action(async (options: { check?: boolean }) => {
+  .option('--apply', 'Apply available updates')
+  .action(async (options: { check?: boolean; apply?: boolean }) => {
     const { upgradeCommand } = await import('./commands/upgrade.js');
     await upgradeCommand(options);
   });

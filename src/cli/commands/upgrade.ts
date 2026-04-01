@@ -2,7 +2,10 @@ import { checkForUpdates } from '../../upgrade/checker.js';
 import { discoverConfigFile, readRawConfig } from '../../config/discovery.js';
 import type { VibeCheckConfig } from '../../types.js';
 
-export async function upgradeCommand(options: { check?: boolean }): Promise<void> {
+export async function upgradeCommand(options: {
+  check?: boolean;
+  apply?: boolean;
+}): Promise<void> {
   const projectRoot = process.cwd();
 
   console.log('\n  VibeCheck Upgrade\n');
@@ -34,13 +37,26 @@ export async function upgradeCommand(options: { check?: boolean }): Promise<void
     return;
   }
 
+  // Display available updates with version diff
   console.log('  Available updates:\n');
   for (const update of available) {
     console.log(`    ${update.name}: ${update.current} -> ${update.latest}`);
   }
 
+  // Show what's new (for the main vibecheck package)
+  const mainUpdate = available.find((u) => u.name === 'vibecheck');
+  if (mainUpdate) {
+    console.log('');
+    displayVersionChanges(mainUpdate.current, mainUpdate.latest);
+  }
+
   if (options.check) {
-    console.log('\n  Run `vibecheck upgrade` (without --check) to apply updates.\n');
+    console.log('\n  Run `vibecheck upgrade --apply` to apply updates.\n');
+    return;
+  }
+
+  if (!options.apply) {
+    console.log('\n  Run `vibecheck upgrade --apply` to apply these updates.\n');
     return;
   }
 
@@ -56,6 +72,7 @@ export async function upgradeCommand(options: { check?: boolean }): Promise<void
         timeout: 60000,
         stdio: ['pipe', 'pipe', 'pipe'],
       });
+      console.log(`    Updated ${update.name} to ${update.latest}`);
     } catch (error) {
       console.error(
         `    Failed to update ${update.name}: ${error instanceof Error ? error.message : 'unknown error'}`,
@@ -64,4 +81,24 @@ export async function upgradeCommand(options: { check?: boolean }): Promise<void
   }
 
   console.log('\n  Updates applied. Run `vibecheck generate` to regenerate hooks.\n');
+}
+
+/**
+ * Display a summary of changes between versions.
+ * In a full implementation this would fetch release notes.
+ * For now, show helpful guidance based on version jump.
+ */
+function displayVersionChanges(current: string, latest: string): void {
+  const currentParts = current.split('.').map(Number);
+  const latestParts = latest.split('.').map(Number);
+
+  if (latestParts[0] > currentParts[0]) {
+    console.log('  MAJOR version upgrade — may contain breaking changes.');
+    console.log('  Review the CHANGELOG before upgrading.');
+  } else if (latestParts[1] > currentParts[1]) {
+    console.log('  Minor version upgrade — new features and rules may be available.');
+    console.log('  Run `vibecheck generate` after upgrading to pick up new rules.');
+  } else {
+    console.log('  Patch version upgrade — bug fixes and improvements.');
+  }
 }

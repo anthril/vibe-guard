@@ -1,6 +1,6 @@
 import { readCredentials } from './credentials.js';
 
-const DEFAULT_API_URL = 'https://api.vibecheck.dev';
+const DEFAULT_API_URL = process.env.VIBECHECK_CLOUD_URL ?? 'https://api.vibecheck.dev';
 
 export interface CloudClientOptions {
   apiUrl?: string;

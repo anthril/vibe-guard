@@ -84,13 +84,21 @@ export function isTokenExpired(creds: CloudCredentials): boolean {
  */
 export async function refreshAccessToken(): Promise<CloudCredentials | null> {
   const creds = readCredentials();
-  if (!creds?.refreshToken || !creds.supabaseUrl || !creds.supabaseAnonKey) return null;
+  if (!creds?.refreshToken || !creds.supabaseUrl) return null;
+
+  // OAuth client ID — needed for public client refresh per OAuth 2.1 spec
+  const clientId = process.env.VIBECHECK_OAUTH_CLIENT_ID ?? 'd49f2c6e-473a-4b94-acdf-9f282cc9a278';
 
   try {
-    const res = await fetch(`${creds.supabaseUrl}/auth/v1/token?grant_type=refresh_token`, {
+    // Use the OAuth token endpoint for refresh (per Supabase OAuth 2.1 docs)
+    const res = await fetch(`${creds.supabaseUrl}/auth/v1/oauth/token`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: creds.supabaseAnonKey },
-      body: JSON.stringify({ refresh_token: creds.refreshToken }),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: creds.refreshToken,
+        client_id: clientId,
+      }),
     });
 
     if (!res.ok) return null;

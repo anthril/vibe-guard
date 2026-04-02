@@ -4,18 +4,22 @@
  * pattern constants, and stdin/output handling.
  */
 
-import { SECRET_PATTERNS, DANGEROUS_COMMAND_PATTERNS, DANGEROUS_SQL_PATTERNS } from '../../utils/patterns.js';
+import {
+  SECRET_PATTERNS,
+  DANGEROUS_COMMAND_PATTERNS,
+  DANGEROUS_SQL_PATTERNS,
+} from '../../utils/patterns.js';
 
 function serializeRegex(re: RegExp): string {
   return `new RegExp(${JSON.stringify(re.source)}, ${JSON.stringify(re.flags)})`;
 }
 
-function serializePatternArray(
-  patterns: Array<[string, RegExp, string]>,
-  varName: string,
-): string {
+function serializePatternArray(patterns: Array<[string, RegExp, string]>, varName: string): string {
   const entries = patterns
-    .map(([name, regex, desc]) => `  [${JSON.stringify(name)}, ${serializeRegex(regex)}, ${JSON.stringify(desc)}]`)
+    .map(
+      ([name, regex, desc]) =>
+        `  [${JSON.stringify(name)}, ${serializeRegex(regex)}, ${JSON.stringify(desc)}]`,
+    )
     .join(',\n');
   return `const ${varName} = [\n${entries}\n];`;
 }

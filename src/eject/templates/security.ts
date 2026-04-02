@@ -90,7 +90,14 @@ if (toolName === 'Bash' && command) {
 }
 
 export function envExposure(ctx: RuleTemplateContext): string {
-  const clientDirs = (ctx.options.clientDirs as string[]) ?? ['/app/', '/pages/', '/components/', '/src/app/', '/src/pages/', '/src/components/'];
+  const clientDirs = (ctx.options.clientDirs as string[]) ?? [
+    '/app/',
+    '/pages/',
+    '/components/',
+    '/src/app/',
+    '/src/pages/',
+    '/src/components/',
+  ];
   return `// ${ctx.ruleId}
 if (['Write', 'Edit'].includes(toolName) && content && filePath) {
   const _ee_norm = filePath.replace(/\\\\/g, '/').toLowerCase();

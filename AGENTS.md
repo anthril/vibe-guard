@@ -133,20 +133,20 @@ To customize the CI output format:
 
 ## Available Presets
 
-| Preset | Stack |
-|--------|-------|
-| `nextjs-15` | Next.js 15 App Router |
-| `react-19` | React 19 patterns |
-| `typescript-strict` | Strict TypeScript |
-| `tailwind` | Tailwind CSS utility-first |
-| `supabase` | Supabase best practices |
-| `astro` | Astro framework |
-| `sveltekit` | SvelteKit |
-| `django` | Django/Python |
-| `fastapi` | FastAPI/Python |
-| `laravel` | Laravel/PHP |
-| `python-strict` | Python PEP 8 |
-| `go` | Go conventions |
+| Preset              | Stack                      |
+| ------------------- | -------------------------- |
+| `nextjs-15`         | Next.js 15 App Router      |
+| `react-19`          | React 19 patterns          |
+| `typescript-strict` | Strict TypeScript          |
+| `tailwind`          | Tailwind CSS utility-first |
+| `supabase`          | Supabase best practices    |
+| `astro`             | Astro framework            |
+| `sveltekit`         | SvelteKit                  |
+| `django`            | Django/Python              |
+| `fastapi`           | FastAPI/Python             |
+| `laravel`           | Laravel/PHP                |
+| `python-strict`     | Python PEP 8               |
+| `go`                | Go conventions             |
 
 ---
 

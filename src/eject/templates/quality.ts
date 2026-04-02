@@ -7,20 +7,32 @@ export function antiPatterns(ctx: RuleTemplateContext): string {
   return `// ${ctx.ruleId}
 if (toolName === 'Write' && content && filePath) {
   const _ap_ext = getExtension(filePath);
-  ${blockCssFiles ? `if (['css', 'scss', 'sass', 'less'].includes(_ap_ext)) {
+  ${
+    blockCssFiles
+      ? `if (['css', 'scss', 'sass', 'less'].includes(_ap_ext)) {
     const _ap_fn = getFilename(filePath);
     if (!_ap_fn.match(/^(globals?|reset|normalize)\\./i)) {
       issues.push({ ruleId: '${ctx.ruleId}', severity: '${ctx.severity}', message: 'CSS file in Tailwind project. Use utility classes.', fix: 'Use Tailwind classes instead.' });
     }
-  }` : ''}
-  ${blockInlineStyles ? `if (['tsx', 'jsx'].includes(_ap_ext) && /style=\\{\\{/.test(content)) {
+  }`
+      : ''
+  }
+  ${
+    blockInlineStyles
+      ? `if (['tsx', 'jsx'].includes(_ap_ext) && /style=\\{\\{/.test(content)) {
     issues.push({ ruleId: '${ctx.ruleId}', severity: '${ctx.severity}', message: 'Inline styles detected. Use Tailwind utility classes.' });
-  }` : ''}
-  ${blockConsoleLog ? `if (['ts', 'tsx', 'js', 'jsx'].includes(_ap_ext) && !filePath.match(/\\.(test|spec|stories)\\./)) {
+  }`
+      : ''
+  }
+  ${
+    blockConsoleLog
+      ? `if (['ts', 'tsx', 'js', 'jsx'].includes(_ap_ext) && !filePath.match(/\\.(test|spec|stories)\\./)) {
     if (/\\bconsole\\.log\\s*\\(/.test(content)) {
       issues.push({ ruleId: '${ctx.ruleId}', severity: '${ctx.severity}', message: 'console.log() detected. Use proper logger.' });
     }
-  }` : ''}
+  }`
+      : ''
+  }
 }`;
 }
 
@@ -77,9 +89,19 @@ if (toolName === 'Write' && content && filePath) {
 }
 
 export function namingConventions(ctx: RuleTemplateContext): string {
-  const componentDirs = (ctx.options.componentDirs as string[]) ?? ['/components/', '/_components/'];
+  const componentDirs = (ctx.options.componentDirs as string[]) ?? [
+    '/components/',
+    '/_components/',
+  ];
   const hookDirs = (ctx.options.hookDirs as string[]) ?? ['/hooks/', '/_hooks/'];
-  const vagueFilenames = (ctx.options.vagueFilenames as string[]) ?? ['utils.ts', 'helpers.ts', 'misc.ts', 'utils.tsx', 'helpers.tsx', 'misc.tsx'];
+  const vagueFilenames = (ctx.options.vagueFilenames as string[]) ?? [
+    'utils.ts',
+    'helpers.ts',
+    'misc.ts',
+    'utils.tsx',
+    'helpers.tsx',
+    'misc.tsx',
+  ];
   return `// ${ctx.ruleId}
 if (toolName === 'Write' && filePath) {
   const _nc_norm = normalizePath(filePath).toLowerCase();

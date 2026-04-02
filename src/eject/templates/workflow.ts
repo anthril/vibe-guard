@@ -2,8 +2,17 @@ import type { RuleTemplateContext } from './index.js';
 
 export function commitConventions(ctx: RuleTemplateContext): string {
   const types = (ctx.options.types as string[]) ?? [
-    'feat', 'fix', 'docs', 'style', 'refactor', 'perf',
-    'test', 'build', 'ci', 'chore', 'revert',
+    'feat',
+    'fix',
+    'docs',
+    'style',
+    'refactor',
+    'perf',
+    'test',
+    'build',
+    'ci',
+    'chore',
+    'revert',
   ];
   return `// ${ctx.ruleId}
 {

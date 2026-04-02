@@ -1,7 +1,7 @@
 import { appendFileSync, mkdirSync, existsSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 
-const PERF_LOG = '.vibecheck/data/perf.jsonl';
+const PERF_LOG = '.vguard/data/perf.jsonl';
 const BUDGET_MS = 100; // 100ms p95 target
 
 export interface PerfEntry {

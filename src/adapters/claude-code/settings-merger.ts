@@ -8,8 +8,8 @@ interface SettingsJson {
 }
 
 /**
- * Merge generated VibeCheck hooks into an existing .claude/settings.json.
- * Preserves non-vibecheck hooks and other settings.
+ * Merge generated VGuard hooks into an existing .claude/settings.json.
+ * Preserves non-VGuard hooks and other settings.
  */
 export async function mergeSettings(
   projectRoot: string,
@@ -29,10 +29,10 @@ export async function mergeSettings(
     }
   }
 
-  // Merge hooks: remove old vibecheck hooks, add new ones
+  // Merge hooks: remove old VGuard hooks, add new ones
   const mergedHooks: Record<string, unknown[]> = {};
 
-  // Keep non-vibecheck hooks from existing settings
+  // Keep non-VGuard hooks from existing settings
   if (existing.hooks) {
     for (const [event, hookGroups] of Object.entries(existing.hooks)) {
       if (Array.isArray(hookGroups)) {
@@ -42,7 +42,7 @@ export async function mergeSettings(
             if (Array.isArray(hooks)) {
               return !hooks.some((h) => {
                 const cmd = (h as Record<string, unknown>).command;
-                return typeof cmd === 'string' && /vibecheck[-\s/\\]|\.vibecheck[/\\]/.test(cmd);
+                return typeof cmd === 'string' && /vguard[-\s/\\]|\.vguard[/\\]/.test(cmd);
               });
             }
           }
@@ -55,7 +55,7 @@ export async function mergeSettings(
     }
   }
 
-  // Add generated vibecheck hooks
+  // Add generated VGuard hooks
   if (generatedSettings.hooks) {
     for (const [event, hookGroups] of Object.entries(generatedSettings.hooks)) {
       if (!mergedHooks[event]) {

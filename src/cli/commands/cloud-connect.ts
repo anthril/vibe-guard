@@ -3,20 +3,20 @@ import { join } from 'node:path';
 import { hasValidCredentials, readCredentials, writeCredentials } from '../../cloud/credentials.js';
 import { CloudClient } from '../../cloud/client.js';
 
-const CLOUD_URL = process.env.VIBECHECK_CLOUD_URL ?? 'https://app.vibecheck.dev';
+const CLOUD_URL = process.env.VGUARD_CLOUD_URL ?? 'https://app.vguard.dev';
 
 /**
- * `vibecheck cloud connect`
+ * `vguard cloud connect`
  *
- * Registers the current repository with VibeCheck Cloud.
- * Auto-updates vibecheck.config.ts and saves API key to .env.local.
+ * Registers the current repository with VGuard Cloud.
+ * Auto-updates vguard.config.ts and saves API key to .env.local.
  */
 export async function cloudConnectCommand(
   options: { name?: string; key?: string; projectId?: string } = {},
 ): Promise<void> {
   const projectRoot = process.cwd();
 
-  console.log('\n  VibeCheck Cloud — Connect Repository\n');
+  console.log('\n  VGuard Cloud — Connect Repository\n');
 
   let apiKey: string;
   let projectId: string;
@@ -30,9 +30,9 @@ export async function cloudConnectCommand(
       console.log('  Option A — Login via browser:');
       console.log(`    1. Visit ${CLOUD_URL}/cli`);
       console.log('    2. Copy the command and run it');
-      console.log('    3. Then run: npx vibecheck cloud connect\n');
+      console.log('    3. Then run: npx vguard cloud connect\n');
       console.log('  Option B — Use an existing API key:');
-      console.log('    npx vibecheck cloud connect --key <vc_key> --project-id <id>\n');
+      console.log('    npx vguard cloud connect --key <vc_key> --project-id <id>\n');
       console.log('  Create a project at the dashboard to get your key and ID.\n');
       process.exit(1);
     }
@@ -62,9 +62,9 @@ export async function cloudConnectCommand(
     console.log('  Saved API key to credentials.');
   }
 
-  // Auto-update vibecheck.config.ts
+  // Auto-update vguard.config.ts
   if (updateConfigFile(projectRoot, projectId)) {
-    console.log('  Updated vibecheck.config.ts with cloud settings.');
+    console.log('  Updated vguard.config.ts with cloud settings.');
   }
 
   // Also write to .env.local for Next.js / framework access
@@ -72,11 +72,11 @@ export async function cloudConnectCommand(
     console.log('  Saved API key to .env.local');
   }
 
-  console.log('\n  Cloud connected! Run `npx vibecheck generate` to rebuild hooks.\n');
+  console.log('\n  Cloud connected! Run `npx vguard generate` to rebuild hooks.\n');
 }
 
 function updateConfigFile(projectRoot: string, projectId: string): boolean {
-  const configPath = join(projectRoot, 'vibecheck.config.ts');
+  const configPath = join(projectRoot, 'vguard.config.ts');
   if (!existsSync(configPath)) return false;
 
   try {
@@ -115,14 +115,14 @@ function updateEnvFile(projectRoot: string, apiKey: string): boolean {
 
     if (existsSync(envPath)) {
       content = readFileSync(envPath, 'utf-8');
-      if (/^VIBECHECK_API_KEY=/m.test(content)) {
-        content = content.replace(/^VIBECHECK_API_KEY=.*$/m, `VIBECHECK_API_KEY=${apiKey}`);
+      if (/^VGUARD_API_KEY=/m.test(content)) {
+        content = content.replace(/^VGUARD_API_KEY=.*$/m, `VGUARD_API_KEY=${apiKey}`);
       } else {
         if (!content.endsWith('\n')) content += '\n';
-        content += `\n# VibeCheck Cloud\nVIBECHECK_API_KEY=${apiKey}\n`;
+        content += `\n# VGuard Cloud\nVGUARD_API_KEY=${apiKey}\n`;
       }
     } else {
-      content = `# VibeCheck Cloud\nVIBECHECK_API_KEY=${apiKey}\n`;
+      content = `# VGuard Cloud\nVGUARD_API_KEY=${apiKey}\n`;
     }
 
     writeFileSync(envPath, content, 'utf-8');

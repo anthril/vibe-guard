@@ -3,7 +3,7 @@ import { join, dirname } from 'node:path';
 import type { CloudConfig, ResolvedConfig, ResolvedRuleConfig } from '../types.js';
 
 /** Path for pre-compiled config cache (relative to project root) */
-const CACHE_PATH = '.vibecheck/cache/resolved-config.json';
+const CACHE_PATH = '.vguard/cache/resolved-config.json';
 
 /** Serializable form of ResolvedConfig (Map → object) */
 interface SerializedConfig {
@@ -48,7 +48,7 @@ export function deserializeConfig(serialized: SerializedConfig): ResolvedConfig 
 
 /**
  * Pre-compile resolved config to JSON for fast hook loading.
- * Written to .vibecheck/cache/resolved-config.json
+ * Written to .vguard/cache/resolved-config.json
  */
 export async function compileConfig(config: ResolvedConfig, projectRoot: string): Promise<string> {
   const outputPath = join(projectRoot, CACHE_PATH);

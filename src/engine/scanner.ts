@@ -36,7 +36,7 @@ const DEFAULT_EXCLUDE = [
   'build/',
   '.git/',
   'coverage/',
-  '.vibecheck/',
+  '.vguard/',
   '__pycache__/',
 ];
 
@@ -56,7 +56,7 @@ const SCANNABLE_EXTENSIONS = new Set([
 
 /**
  * Scan a project directory and run all applicable rules against each file.
- * This is the engine behind `vibecheck lint`.
+ * This is the engine behind `vguard lint`.
  */
 export async function scanProject(options: ScanOptions): Promise<ScanResult> {
   const { rootDir, config, exclude = DEFAULT_EXCLUDE } = options;

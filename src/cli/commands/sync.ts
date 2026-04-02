@@ -2,22 +2,22 @@ import { syncToCloud } from '../../cloud/sync.js';
 import { readCredentials } from '../../cloud/credentials.js';
 
 /**
- * `vibecheck sync`
+ * `vguard sync`
  *
- * Uploads rule-hits.jsonl data to VibeCheck Cloud since last sync.
+ * Uploads rule-hits.jsonl data to VGuard Cloud since last sync.
  */
 export async function syncCommand(
   options: { force?: boolean; dryRun?: boolean } = {},
 ): Promise<void> {
   const projectRoot = process.cwd();
 
-  console.log('\n  VibeCheck Cloud — Sync\n');
+  console.log('\n  VGuard Cloud — Sync\n');
 
   // Get API key from environment or stored credentials
-  const apiKey = process.env.VIBECHECK_API_KEY ?? readCredentials()?.apiKey;
+  const apiKey = process.env.VGUARD_API_KEY ?? readCredentials()?.apiKey;
   if (!apiKey) {
     console.error('  No API key found.');
-    console.error('  Run `npx vibecheck cloud connect` to register this project.\n');
+    console.error('  Run `npx vguard cloud connect` to register this project.\n');
     process.exit(1);
   }
 

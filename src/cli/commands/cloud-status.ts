@@ -2,14 +2,14 @@ import { hasValidCredentials, readCredentials } from '../../cloud/credentials.js
 import { readSyncCursor } from '../../cloud/sync.js';
 
 /**
- * `vibecheck cloud status`
+ * `vguard cloud status`
  *
  * Shows the current Cloud connection status.
  */
 export async function cloudStatusCommand(): Promise<void> {
   const projectRoot = process.cwd();
 
-  console.log('\n  VibeCheck Cloud — Status\n');
+  console.log('\n  VGuard Cloud — Status\n');
 
   // Auth status
   const creds = readCredentials();
@@ -17,7 +17,7 @@ export async function cloudStatusCommand(): Promise<void> {
     console.log(`  Auth: Logged in${creds.email ? ` as ${creds.email}` : ''}`);
   } else {
     console.log('  Auth: Not logged in');
-    console.log('  Run `vibecheck cloud login` to authenticate.\n');
+    console.log('  Run `vguard cloud login` to authenticate.\n');
     return;
   }
 

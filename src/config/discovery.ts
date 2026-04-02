@@ -4,10 +4,10 @@ import { join } from 'node:path';
 
 /** Supported config file names in priority order */
 const CONFIG_FILES = [
-  'vibecheck.config.ts',
-  'vibecheck.config.js',
-  'vibecheck.config.mjs',
-  '.vibecheckrc.json',
+  'vguard.config.ts',
+  'vguard.config.js',
+  'vguard.config.mjs',
+  '.vguardrc.json',
 ];
 
 export interface DiscoveredConfig {
@@ -18,8 +18,8 @@ export interface DiscoveredConfig {
 }
 
 /**
- * Find the vibecheck config file in a project root.
- * Searches in priority order: .ts > .js > .mjs > .json > package.json#vibecheck
+ * Find the VGuard config file in a project root.
+ * Searches in priority order: .ts > .js > .mjs > .json > package.json#vguard
  */
 export function discoverConfigFile(projectRoot: string): DiscoveredConfig | null {
   for (const filename of CONFIG_FILES) {
@@ -34,14 +34,13 @@ export function discoverConfigFile(projectRoot: string): DiscoveredConfig | null
     }
   }
 
-  // Check package.json for "vibecheck" field
+  // Check package.json for "vguard" field
   const pkgPath = join(projectRoot, 'package.json');
   if (existsSync(pkgPath)) {
     try {
-      // We'll read synchronously for discovery — this is a fast check
       const raw = readFileSync(pkgPath, 'utf-8');
       const pkg = JSON.parse(raw);
-      if (pkg.vibecheck) {
+      if (pkg.vguard) {
         return { path: pkgPath, format: 'json' };
       }
     } catch {
@@ -64,9 +63,9 @@ export async function readRawConfig(
     const raw = await readFile(discovered.path, 'utf-8');
     const parsed = JSON.parse(raw);
 
-    // If it's package.json, extract the "vibecheck" field
+    // If it's package.json, extract the "vguard" field
     if (discovered.path.endsWith('package.json')) {
-      return parsed.vibecheck ?? {};
+      return parsed.vguard ?? {};
     }
     return parsed;
   }

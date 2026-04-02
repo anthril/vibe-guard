@@ -5,7 +5,7 @@ import { getPromotionSuggestions } from '../../learn/promoter.js';
 export async function learnCommand(): Promise<void> {
   const projectRoot = process.cwd();
 
-  console.log('\n  VibeCheck Learn — Scanning codebase for conventions...\n');
+  console.log('\n  VGuard Learn — Scanning codebase for conventions...\n');
 
   const startTime = Date.now();
 
@@ -50,7 +50,7 @@ export async function learnCommand(): Promise<void> {
     for (const s of suggestions) {
       console.log(`    ${s.ruleId}: ${s.reason}`);
     }
-    console.log('\n  Add these to your vibecheck.config.ts rules section.');
+    console.log('\n  Add these to your vguard.config.ts rules section.');
   }
 
   console.log();

@@ -1,8 +1,8 @@
-# VibeCheck — Project Instructions
+# VGuard — Project Instructions
 
-## What is VibeCheck?
+## What is VGuard?
 
-VibeCheck is a runtime-enforced AI coding guardrails framework. It generates hook scripts for AI agents (Claude Code, Cursor, Codex, OpenCode) that enforce security, quality, and workflow rules during AI coding sessions.
+VGuard (VibeGuard) is a runtime-enforced AI coding guardrails framework. It generates hook scripts for AI agents (Claude Code, Cursor, Codex, OpenCode) that enforce security, quality, and workflow rules during AI coding sessions.
 
 ## Architecture
 
@@ -52,8 +52,8 @@ npm run format       # Prettier
 
 ## Critical Design Decisions
 
-1. **Hook scripts are pre-compiled** to `.vibecheck/cache/resolved-config.json` for fast execution (<100ms target)
-2. **Tracker** (`.vibecheck/data/rule-hits.jsonl`) is append-only JSONL with 10MB auto-rotation — this is the data layer Cloud will consume
+1. **Hook scripts are pre-compiled** to `.vguard/cache/resolved-config.json` for fast execution (<100ms target)
+2. **Tracker** (`.vguard/data/rule-hits.jsonl`) is append-only JSONL with 10MB auto-rotation — this is the data layer Cloud will consume
 3. **Config resolution**: defaults → presets → user rules. Severity can only be *downgraded*, never upgraded by presets
 4. **Claude Code adapter** generates hooks and merges into `.claude/settings.json` — it does NOT overwrite existing settings
 

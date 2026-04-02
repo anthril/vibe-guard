@@ -1,19 +1,19 @@
-# VibeCheck — AI Agent Setup Instructions
+# VGuard — AI Agent Setup Instructions
 
-Copy the relevant section below and provide it to your AI coding assistant (Claude Code, Codex, Cursor, etc.) as instructions for setting up VibeCheck in your project.
+Copy the relevant section below and provide it to your AI coding assistant (Claude Code, Codex, Cursor, etc.) as instructions for setting up VGuard in your project.
 
 ---
 
 ## For Claude Code
 
 ```
-I want you to set up VibeCheck, an AI coding guardrails framework, in this project.
+I want you to set up VGuard, an AI coding guardrails framework, in this project.
 
 1. Install the package:
-   npm install -D @solanticai/vibecheck
+   npm install -D @solanticai/vguard
 
 2. Run the interactive setup:
-   npx vibecheck init
+   npx vguard init
 
    When prompted:
    - Select presets that match the project's tech stack (e.g., nextjs-15, typescript-strict, react-19, tailwind, supabase)
@@ -21,28 +21,28 @@ I want you to set up VibeCheck, an AI coding guardrails framework, in this proje
    - Set protected branches to "main, master"
 
 3. Verify the setup:
-   npx vibecheck doctor
+   npx vguard doctor
 
    All checks should pass. If any fail, fix the issues it reports.
 
-4. (Optional) Connect to VibeCheck Cloud for analytics:
-   npx vibecheck cloud login
-   npx vibecheck cloud connect
-   npx vibecheck generate
+4. (Optional) Connect to VGuard Cloud for analytics:
+   npx vguard cloud login
+   npx vguard cloud connect
+   npx vguard generate
 
 5. Run a lint scan to see current issues:
-   npx vibecheck lint
+   npx vguard lint
 
-After setup, VibeCheck will automatically enforce rules via hooks in .claude/settings.json.
+After setup, VGuard will automatically enforce rules via hooks in .claude/settings.json.
 The hooks fire on PreToolUse (before Edit/Write/Bash), PostToolUse (after), and Stop (session end).
 If a rule blocks, the tool execution is prevented. Warnings are logged but don't block.
 
 Key commands:
-- npx vibecheck lint          — scan for issues
-- npx vibecheck learn         — discover codebase conventions
-- npx vibecheck report        — generate quality dashboard
-- npx vibecheck doctor        — check config health
-- npx vibecheck generate      — regenerate hooks after config changes
+- npx vguard lint          — scan for issues
+- npx vguard learn         — discover codebase conventions
+- npx vguard report        — generate quality dashboard
+- npx vguard doctor        — check config health
+- npx vguard generate      — regenerate hooks after config changes
 ```
 
 ---
@@ -50,20 +50,20 @@ Key commands:
 ## For Codex CLI
 
 ```
-I want you to set up VibeCheck, an AI coding guardrails framework, in this project.
+I want you to set up VGuard, an AI coding guardrails framework, in this project.
 
-1. Install: npm install -D @solanticai/vibecheck
-2. Initialize: npx vibecheck init
+1. Install: npm install -D @solanticai/vguard
+2. Initialize: npx vguard init
    - Pick presets matching the project stack
    - Select "Codex" as the AI agent
    - Set protected branches to "main, master"
-3. Verify: npx vibecheck doctor
-4. Scan: npx vibecheck lint
+3. Verify: npx vguard doctor
+4. Scan: npx vguard lint
 
-VibeCheck generates an AGENTS.md file that Codex reads for advisory rules.
+VGuard generates an AGENTS.md file that Codex reads for advisory rules.
 The rules are not runtime-enforced for Codex (advisory mode only).
 
-After setup, run `npx vibecheck generate` whenever you change vibecheck.config.ts.
+After setup, run `npx vguard generate` whenever you change vguard.config.ts.
 ```
 
 ---
@@ -71,20 +71,20 @@ After setup, run `npx vibecheck generate` whenever you change vibecheck.config.t
 ## For Cursor
 
 ```
-I want you to set up VibeCheck, an AI coding guardrails framework, in this project.
+I want you to set up VGuard, an AI coding guardrails framework, in this project.
 
-1. Install: npm install -D @solanticai/vibecheck
-2. Initialize: npx vibecheck init
+1. Install: npm install -D @solanticai/vguard
+2. Initialize: npx vguard init
    - Pick presets matching the project stack
    - Select "Cursor" as the AI agent
    - Set protected branches to "main, master"
-3. Verify: npx vibecheck doctor
-4. Scan: npx vibecheck lint
+3. Verify: npx vguard doctor
+4. Scan: npx vguard lint
 
-VibeCheck generates a .cursorrules file that Cursor reads for advisory rules.
+VGuard generates a .cursorrules file that Cursor reads for advisory rules.
 The rules guide Cursor's suggestions but are not runtime-enforced.
 
-After setup, run `npx vibecheck generate` whenever you change vibecheck.config.ts.
+After setup, run `npx vguard generate` whenever you change vguard.config.ts.
 ```
 
 ---
@@ -92,18 +92,18 @@ After setup, run `npx vibecheck generate` whenever you change vibecheck.config.t
 ## For OpenCode
 
 ```
-I want you to set up VibeCheck, an AI coding guardrails framework, in this project.
+I want you to set up VGuard, an AI coding guardrails framework, in this project.
 
-1. Install: npm install -D @solanticai/vibecheck
-2. Initialize: npx vibecheck init
+1. Install: npm install -D @solanticai/vguard
+2. Initialize: npx vguard init
    - Pick presets matching the project stack
    - Select "OpenCode" as the AI agent
    - Set protected branches to "main, master"
-3. Verify: npx vibecheck doctor
-4. Scan: npx vibecheck lint
+3. Verify: npx vguard doctor
+4. Scan: npx vguard lint
 
-VibeCheck generates configuration in the .opencode/ directory.
-After setup, run `npx vibecheck generate` whenever you change vibecheck.config.ts.
+VGuard generates configuration in the .opencode/ directory.
+After setup, run `npx vguard generate` whenever you change vguard.config.ts.
 ```
 
 ---
@@ -111,22 +111,22 @@ After setup, run `npx vibecheck generate` whenever you change vibecheck.config.t
 ## For GitHub Actions (CI)
 
 ```
-I want you to set up VibeCheck as a CI quality gate in this project's GitHub Actions workflow.
+I want you to set up VGuard as a CI quality gate in this project's GitHub Actions workflow.
 
-1. Install: npm install -D @solanticai/vibecheck
-2. Initialize: npx vibecheck init
+1. Install: npm install -D @solanticai/vguard
+2. Initialize: npx vguard init
    - Pick presets matching the project stack
    - Select "Claude Code" (or any agent — the CI adapter is always generated)
    - Set protected branches to "main, master"
-3. Generate the workflow: npx vibecheck generate
+3. Generate the workflow: npx vguard generate
 
-This creates .github/workflows/vibecheck.yml which runs `vibecheck lint` on every PR.
+This creates .github/workflows/vguard.yml which runs `vguard lint` on every PR.
 The lint command exits with code 1 if blocking issues are found, failing the check.
 
 To customize the CI output format:
-- npx vibecheck lint --format github-actions   (annotates PR files)
-- npx vibecheck lint --format json             (machine-readable)
-- npx vibecheck lint --format text             (human-readable, default)
+- npx vguard lint --format github-actions   (annotates PR files)
+- npx vguard lint --format json             (machine-readable)
+- npx vguard lint --format text             (human-readable, default)
 ```
 
 ---
@@ -152,10 +152,10 @@ To customize the CI output format:
 
 ## Configuration Reference
 
-After `vibecheck init`, your `vibecheck.config.ts` looks like:
+After `vguard init`, your `vguard.config.ts` looks like:
 
 ```typescript
-import { defineConfig } from '@solanticai/vibecheck';
+import { defineConfig } from '@solanticai/vguard';
 
 export default defineConfig({
   presets: ['nextjs-15', 'typescript-strict'],
@@ -173,4 +173,4 @@ export default defineConfig({
 });
 ```
 
-See https://github.com/solanticai/VibeCheck for full documentation.
+See https://github.com/solanticai/VGuard for full documentation.

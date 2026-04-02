@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, unlinkSync } from '
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 
-const CREDENTIALS_DIR = join(homedir(), '.vibecheck');
+const CREDENTIALS_DIR = join(homedir(), '.vguard');
 const CREDENTIALS_FILE = join(CREDENTIALS_DIR, 'credentials.json');
 
 export interface CloudCredentials {
@@ -91,7 +91,7 @@ export async function refreshAccessToken(): Promise<CloudCredentials | null> {
   if (!creds?.refreshToken || !creds.supabaseUrl) return null;
 
   // OAuth client ID — needed for public client refresh per OAuth 2.1 spec
-  const clientId = process.env.VIBECHECK_OAUTH_CLIENT_ID ?? 'd49f2c6e-473a-4b94-acdf-9f282cc9a278';
+  const clientId = process.env.VGUARD_OAUTH_CLIENT_ID ?? 'd49f2c6e-473a-4b94-acdf-9f282cc9a278';
 
   try {
     // Use the OAuth token endpoint for refresh (per Supabase OAuth 2.1 docs)

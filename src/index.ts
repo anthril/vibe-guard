@@ -8,7 +8,7 @@ export type {
   HookEvent,
   MatchPattern,
   GitContext,
-  VibeCheckConfig,
+  VGuardConfig,
   ResolvedConfig,
   ResolvedRuleConfig,
   RuleConfig,
@@ -16,7 +16,7 @@ export type {
   Preset,
   Adapter,
   GeneratedFile,
-  VibeCheckPlugin,
+  VGuardPlugin,
   LearnConfig,
 } from './types.js';
 

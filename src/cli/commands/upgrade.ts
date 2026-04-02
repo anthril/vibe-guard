@@ -1,21 +1,21 @@
 import { checkForUpdates } from '../../upgrade/checker.js';
 import { discoverConfigFile, readRawConfig } from '../../config/discovery.js';
-import type { VibeCheckConfig } from '../../types.js';
+import type { VGuardConfig } from '../../types.js';
 
 export async function upgradeCommand(options: { check?: boolean; apply?: boolean }): Promise<void> {
   const projectRoot = process.cwd();
 
-  console.log('\n  VibeCheck Upgrade\n');
+  console.log('\n  VGuard Upgrade\n');
 
   // Determine packages to check
-  const packagesToCheck = ['vibecheck'];
+  const packagesToCheck = ['vguard'];
 
   // Check for plugin packages
   const discovered = discoverConfigFile(projectRoot);
   if (discovered) {
     try {
       const rawConfig = await readRawConfig(discovered);
-      const config = rawConfig as VibeCheckConfig;
+      const config = rawConfig as VGuardConfig;
       if (config.plugins) {
         packagesToCheck.push(...config.plugins);
       }
@@ -40,20 +40,20 @@ export async function upgradeCommand(options: { check?: boolean; apply?: boolean
     console.log(`    ${update.name}: ${update.current} -> ${update.latest}`);
   }
 
-  // Show what's new (for the main vibecheck package)
-  const mainUpdate = available.find((u) => u.name === 'vibecheck');
+  // Show what's new (for the main VGuard package)
+  const mainUpdate = available.find((u) => u.name === 'vguard');
   if (mainUpdate) {
     console.log('');
     displayVersionChanges(mainUpdate.current, mainUpdate.latest);
   }
 
   if (options.check) {
-    console.log('\n  Run `vibecheck upgrade --apply` to apply updates.\n');
+    console.log('\n  Run `vguard upgrade --apply` to apply updates.\n');
     return;
   }
 
   if (!options.apply) {
-    console.log('\n  Run `vibecheck upgrade --apply` to apply these updates.\n');
+    console.log('\n  Run `vguard upgrade --apply` to apply these updates.\n');
     return;
   }
 
@@ -83,7 +83,7 @@ export async function upgradeCommand(options: { check?: boolean; apply?: boolean
     }
   }
 
-  console.log('\n  Updates applied. Run `vibecheck generate` to regenerate hooks.\n');
+  console.log('\n  Updates applied. Run `vguard generate` to regenerate hooks.\n');
 }
 
 /**
@@ -100,7 +100,7 @@ function displayVersionChanges(current: string, latest: string): void {
     console.log('  Review the CHANGELOG before upgrading.');
   } else if (latestParts[1] > currentParts[1]) {
     console.log('  Minor version upgrade — new features and rules may be available.');
-    console.log('  Run `vibecheck generate` after upgrading to pick up new rules.');
+    console.log('  Run `vguard generate` after upgrading to pick up new rules.');
   } else {
     console.log('  Patch version upgrade — bug fixes and improvements.');
   }

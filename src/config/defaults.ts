@@ -1,8 +1,8 @@
-import type { VibeCheckConfig } from '../types.js';
+import type { VGuardConfig } from '../types.js';
 
 /** Default configuration values */
 export const DEFAULT_CONFIG: Required<
-  Pick<VibeCheckConfig, 'presets' | 'agents' | 'rules' | 'plugins'>
+  Pick<VGuardConfig, 'presets' | 'agents' | 'rules' | 'plugins'>
 > = {
   presets: [],
   agents: ['claude-code'],

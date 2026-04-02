@@ -1,12 +1,12 @@
 import { clearCredentials, hasValidCredentials } from '../../cloud/credentials.js';
 
 /**
- * `vibecheck cloud logout`
+ * `vguard cloud logout`
  *
  * Removes stored Cloud credentials.
  */
 export async function cloudLogoutCommand(): Promise<void> {
-  console.log('\n  VibeCheck Cloud — Logout\n');
+  console.log('\n  VGuard Cloud — Logout\n');
 
   if (!hasValidCredentials()) {
     console.log('  Not currently logged in.\n');

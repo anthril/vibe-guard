@@ -3,7 +3,7 @@ import { join, dirname } from 'node:path';
 import { readRuleHits, type RuleHitRecord } from '../engine/tracker.js';
 import { CloudClient } from './client.js';
 
-const CURSOR_FILE = '.vibecheck/data/sync-cursor.json';
+const CURSOR_FILE = '.vguard/data/sync-cursor.json';
 
 interface SyncCursor {
   /** ISO timestamp of the last synced record */

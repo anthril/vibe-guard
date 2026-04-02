@@ -17,13 +17,13 @@ function getVersion(): string {
 const program = new Command();
 
 program
-  .name('vibecheck')
+  .name('vguard')
   .description('AI coding guardrails framework. Runtime-enforced quality controls.')
   .version(getVersion());
 
 program
   .command('init')
-  .description('Interactive setup wizard — configure VibeCheck for your project')
+  .description('Interactive setup wizard — configure VGuard for your project')
   .action(async () => {
     const { initCommand } = await import('./commands/init.js');
     await initCommand();
@@ -31,7 +31,7 @@ program
 
 program
   .command('add <id>')
-  .description('Add a rule or preset (e.g., vibecheck add security/branch-protection)')
+  .description('Add a rule or preset (e.g., vguard add security/branch-protection)')
   .action(async (id: string) => {
     const { addCommand } = await import('./commands/add.js');
     await addCommand(id);
@@ -39,7 +39,7 @@ program
 
 program
   .command('remove <id>')
-  .description('Remove a rule or preset (e.g., vibecheck remove preset:nextjs-15)')
+  .description('Remove a rule or preset (e.g., vguard remove preset:nextjs-15)')
   .action(async (id: string) => {
     const { removeCommand } = await import('./commands/remove.js');
     await removeCommand(id);
@@ -88,9 +88,9 @@ program
 
 program
   .command('eject')
-  .description('Export standalone hooks (removes vibecheck dependency)')
+  .description('Export standalone hooks (removes VGuard dependency)')
   .option('--adapter <adapter>', 'Target adapter (default: claude-code)', 'claude-code')
-  .option('--output <dir>', 'Output directory (default: .vibecheck/ejected)')
+  .option('--output <dir>', 'Output directory (default: .vguard/ejected)')
   .action(async (options: { adapter?: string; output?: string }) => {
     const { ejectCommand } = await import('./commands/eject.js');
     await ejectCommand(options);
@@ -98,7 +98,7 @@ program
 
 program
   .command('upgrade')
-  .description('Check for and apply updates to vibecheck and plugins')
+  .description('Check for and apply updates to VGuard and plugins')
   .option('--check', 'Only check for updates, do not apply')
   .option('--apply', 'Apply available updates')
   .action(async (options: { check?: boolean; apply?: boolean }) => {
@@ -118,11 +118,11 @@ program
 // Cloud subcommands
 const cloud = program
   .command('cloud')
-  .description('VibeCheck Cloud commands (login, connect, status)');
+  .description('VGuard Cloud commands (login, connect, status)');
 
 cloud
   .command('login')
-  .description('Authenticate with VibeCheck Cloud (opens browser by default)')
+  .description('Authenticate with VGuard Cloud (opens browser by default)')
   .option('--token <token>', 'Manual token login for CI/headless (skip browser)')
   .option('--refresh-token <token>', 'Supabase refresh token (with --token)')
   .option('--url <url>', 'Cloud API URL (e.g. http://localhost:3000)')
@@ -153,7 +153,7 @@ cloud
 
 cloud
   .command('connect')
-  .description('Register current repository with VibeCheck Cloud')
+  .description('Register current repository with VGuard Cloud')
   .option('--name <name>', 'Project name (defaults to directory name)')
   .option('--key <key>', 'Use an existing project API key (skip login)')
   .option('--project-id <id>', 'Project ID (required with --key)')
@@ -172,7 +172,7 @@ cloud
 
 program
   .command('sync')
-  .description('Upload rule-hits data to VibeCheck Cloud')
+  .description('Upload rule-hits data to VGuard Cloud')
   .option('--force', 'Re-upload all data (ignores cursor)')
   .option('--dry-run', 'Show what would be uploaded without sending')
   .action(async (options: { force?: boolean; dryRun?: boolean }) => {

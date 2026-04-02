@@ -1,4 +1,4 @@
-import type { VibeCheckPlugin } from '../types.js';
+import type { VGuardPlugin } from '../types.js';
 import { hasRule } from '../engine/registry.js';
 import { hasPreset } from '../config/presets.js';
 
@@ -17,7 +17,7 @@ export interface ValidationResult {
  * - Rule IDs follow naming convention (category/name)
  * - Preset IDs don't conflict with built-in presets
  */
-export function validatePlugin(plugin: VibeCheckPlugin, packageName: string): ValidationResult {
+export function validatePlugin(plugin: VGuardPlugin, packageName: string): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 

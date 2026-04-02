@@ -54,7 +54,7 @@ describe('OpenCode adapter', () => {
     const files = await openCodeAdapter.generate(makeConfig(), '/p');
     const instructions = files.find((f) => f.path === '.opencode/instructions.md');
     expect(instructions).toBeDefined();
-    expect(instructions!.content).toContain('VibeCheck Rules');
+    expect(instructions!.content).toContain('VGuard Rules');
     expect(instructions!.content).toContain('advisory');
   });
 

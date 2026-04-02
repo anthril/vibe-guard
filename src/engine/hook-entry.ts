@@ -1,6 +1,6 @@
 /**
  * Hook entry point for generated hook scripts.
- * This module is imported by generated hook scripts via `require('vibecheck/hooks/runner')`.
+ * This module is imported by generated hook scripts via `require('@solanticai/vguard/hooks/runner')`.
  *
  * It reads stdin, builds context, resolves rules, runs them, and outputs results.
  */
@@ -108,7 +108,7 @@ function triggerCloudSync(projectRoot: string): void {
   // Check for API key in environment or stored credentials
   import('../cloud/credentials.js')
     .then(({ readCredentials }) => {
-      const apiKey = process.env.VIBECHECK_API_KEY ?? readCredentials()?.apiKey;
+      const apiKey = process.env.VGUARD_API_KEY ?? readCredentials()?.apiKey;
       if (!apiKey) return;
 
       // Fire-and-forget async sync

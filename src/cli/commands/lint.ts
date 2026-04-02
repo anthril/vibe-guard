@@ -8,7 +8,7 @@ import { scanProject } from '../../engine/scanner.js';
 import { formatText } from '../formatters/text.js';
 import { formatGitHubActions } from '../formatters/github-actions.js';
 import { formatJson } from '../formatters/json.js';
-import type { VibeCheckConfig } from '../../types.js';
+import type { VGuardConfig } from '../../types.js';
 
 export async function lintCommand(options: { format?: string }): Promise<void> {
   const projectRoot = process.cwd();
@@ -16,13 +16,13 @@ export async function lintCommand(options: { format?: string }): Promise<void> {
   // Load config
   const discovered = discoverConfigFile(projectRoot);
   if (!discovered) {
-    console.error('  No vibecheck config found. Run `vibecheck init` first.');
+    console.error('  No VGuard config found. Run `vguard init` first.');
     process.exit(1);
   }
 
   const rawConfig = await readRawConfig(discovered);
   const presetMap = getAllPresets();
-  const resolvedConfig = resolveConfig(rawConfig as VibeCheckConfig, presetMap);
+  const resolvedConfig = resolveConfig(rawConfig as VGuardConfig, presetMap);
 
   // Scan project
   const result = await scanProject({

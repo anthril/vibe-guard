@@ -1,5 +1,5 @@
 import type {
-  VibeCheckConfig,
+  VGuardConfig,
   ResolvedConfig,
   ResolvedRuleConfig,
   RuleConfig,
@@ -11,7 +11,7 @@ import { discoverConfigFile, readRawConfig } from './discovery.js';
 import { getProfileSeverity, type ProfileName } from './profiles.js';
 
 /**
- * Load and resolve the vibecheck config from a project root.
+ * Load and resolve the VGuard config from a project root.
  * Applies global config inheritance: global → project.
  * Returns null if no config file is found.
  */
@@ -20,9 +20,9 @@ export async function loadConfig(projectRoot: string): Promise<ResolvedConfig | 
   if (!discovered) return null;
 
   const raw = await readRawConfig(discovered);
-  const projectConfig = raw as VibeCheckConfig;
+  const projectConfig = raw as VGuardConfig;
 
-  // Load global config (~/.vibecheck/config.ts) if it exists
+  // Load global config (~/.vguard/config.ts) if it exists
   const globalConfig = await loadGlobalConfig();
 
   // Merge: global → project (project wins)
@@ -32,19 +32,19 @@ export async function loadConfig(projectRoot: string): Promise<ResolvedConfig | 
 }
 
 /**
- * Load the global user config from ~/.vibecheck/config.ts.
+ * Load the global user config from ~/.vguard/config.ts.
  * Returns null if no global config exists.
  */
-async function loadGlobalConfig(): Promise<VibeCheckConfig | null> {
+async function loadGlobalConfig(): Promise<VGuardConfig | null> {
   const { homedir } = await import('node:os');
   const { join } = await import('node:path');
-  const globalRoot = join(homedir(), '.vibecheck');
+  const globalRoot = join(homedir(), '.vguard');
   const discovered = discoverConfigFile(globalRoot);
   if (!discovered) return null;
 
   try {
     const raw = await readRawConfig(discovered);
-    return raw as VibeCheckConfig;
+    return raw as VGuardConfig;
   } catch {
     return null;
   }
@@ -54,7 +54,7 @@ async function loadGlobalConfig(): Promise<VibeCheckConfig | null> {
  * Merge two configs: base → override.
  * Override values take precedence. Rules are merged per-key.
  */
-function mergeConfigs(base: VibeCheckConfig, override: VibeCheckConfig): VibeCheckConfig {
+function mergeConfigs(base: VGuardConfig, override: VGuardConfig): VGuardConfig {
   return {
     profile: override.profile ?? base.profile,
     presets: override.presets ?? base.presets,
@@ -72,14 +72,14 @@ function mergeConfigs(base: VibeCheckConfig, override: VibeCheckConfig): VibeChe
  * Merges: defaults → presets (in order) → user rules
  */
 export function resolveConfig(
-  userConfig: VibeCheckConfig,
+  userConfig: VGuardConfig,
   presetMap?: Map<string, Preset>,
 ): ResolvedConfig {
   // Validate config shape
   const parseResult = vibeCheckConfigSchema.safeParse(userConfig);
   if (!parseResult.success) {
     const errors = parseResult.error.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`);
-    throw new Error(`Invalid vibecheck config:\n${errors.join('\n')}`);
+    throw new Error(`Invalid VGuard config:\n${errors.join('\n')}`);
   }
 
   const config = parseResult.data;

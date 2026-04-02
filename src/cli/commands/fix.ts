@@ -7,29 +7,29 @@ import { discoverConfigFile, readRawConfig } from '../../config/discovery.js';
 import { resolveConfig } from '../../config/loader.js';
 import { getAllPresets } from '../../config/presets.js';
 import { scanProject } from '../../engine/scanner.js';
-import type { VibeCheckConfig, HookContext } from '../../types.js';
+import type { VGuardConfig, HookContext } from '../../types.js';
 import { getAllRules } from '../../engine/registry.js';
 
 /**
- * `vibecheck fix`
+ * `vguard fix`
  *
  * Scans the project and applies autofixes for rules that provide them.
  */
 export async function fixCommand(options: { dryRun?: boolean } = {}): Promise<void> {
   const projectRoot = process.cwd();
 
-  console.log('\n  VibeCheck Fix — Auto-fixing issues...\n');
+  console.log('\n  VGuard Fix — Auto-fixing issues...\n');
 
   // Load config
   const discovered = discoverConfigFile(projectRoot);
   if (!discovered) {
-    console.error('  No vibecheck config found. Run `vibecheck init` first.');
+    console.error('  No VGuard config found. Run `vguard init` first.');
     process.exit(1);
   }
 
   const rawConfig = await readRawConfig(discovered);
   const presetMap = getAllPresets();
-  const config = resolveConfig(rawConfig as VibeCheckConfig, presetMap);
+  const config = resolveConfig(rawConfig as VGuardConfig, presetMap);
 
   // Scan for issues
   const scanResult = await scanProject({ rootDir: projectRoot, config });
@@ -103,7 +103,7 @@ export async function fixCommand(options: { dryRun?: boolean } = {}): Promise<vo
   console.log('');
   if (options.dryRun) {
     console.log(`  ${fixesAvailable} autofix${fixesAvailable !== 1 ? 'es' : ''} available.`);
-    console.log('  Run `vibecheck fix` without --dry-run to apply.\n');
+    console.log('  Run `vguard fix` without --dry-run to apply.\n');
   } else if (fixesApplied > 0) {
     console.log(`  Applied ${fixesApplied} autofix${fixesApplied !== 1 ? 'es' : ''}.\n`);
   } else {

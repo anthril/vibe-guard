@@ -7,7 +7,7 @@ export async function removeCommand(id: string): Promise<void> {
   const configPath = findConfigPath(projectRoot);
 
   if (!configPath) {
-    console.error('  No vibecheck config found. Run `vibecheck init` first.');
+    console.error('  No VGuard config found. Run `vguard init` first.');
     process.exit(1);
   }
 
@@ -28,24 +28,24 @@ export async function removeCommand(id: string): Promise<void> {
 
     await writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
     console.log(`  Removed ${isPreset ? 'preset' : 'rule'}: ${actualId}`);
-    console.log('  Run `vibecheck generate` to update hooks.\n');
+    console.log('  Run `vguard generate` to update hooks.\n');
   } else {
-    console.log(`\n  To remove from your vibecheck.config.ts:\n`);
+    console.log(`\n  To remove from your vguard.config.ts:\n`);
     if (isPreset) {
       console.log(`    Remove '${actualId}' from the presets array.`);
     } else {
       console.log(`    Set '${actualId}': false in the rules object.`);
     }
-    console.log(`\n  Then run \`vibecheck generate\` to update hooks.\n`);
+    console.log(`\n  Then run \`vguard generate\` to update hooks.\n`);
   }
 }
 
 function findConfigPath(projectRoot: string): string | null {
   const candidates = [
-    'vibecheck.config.ts',
-    'vibecheck.config.js',
-    'vibecheck.config.mjs',
-    '.vibecheckrc.json',
+    'vguard.config.ts',
+    'vguard.config.js',
+    'vguard.config.mjs',
+    '.vguardrc.json',
   ];
 
   for (const file of candidates) {

@@ -13,7 +13,7 @@ export function formatPreToolUseOutput(result: RunResult): {
 } {
   if (result.blocked && result.blockingResult) {
     const r = result.blockingResult;
-    let message = `\nBLOCKED by vibecheck [${r.ruleId}]\n\n${r.message || 'Rule violation detected.'}`;
+    let message = `\nBLOCKED by VGuard [${r.ruleId}]\n\n${r.message || 'Rule violation detected.'}`;
     if (r.fix) {
       message += `\n\nFix: ${r.fix}`;
     }
@@ -31,7 +31,7 @@ export function formatPreToolUseOutput(result: RunResult): {
 
     const output = JSON.stringify({
       continue: true,
-      systemMessage: `VibeCheck warnings:\n${messages}`,
+      systemMessage: `VGuard warnings:\n${messages}`,
     });
 
     return { exitCode: 0, stderr: '', stdout: output };
@@ -61,7 +61,7 @@ export function formatPostToolUseOutput(result: RunResult): {
 
     const output = JSON.stringify({
       decision: 'block',
-      reason: `VibeCheck feedback:\n${messages}`,
+      reason: `VGuard feedback:\n${messages}`,
     });
 
     return { exitCode: 0, stdout: output };
@@ -86,7 +86,7 @@ export function formatStopOutput(result: RunResult): {
   if (messages) {
     return {
       exitCode: 0,
-      stderr: `\nVibeCheck session summary:\n${messages}\n`,
+      stderr: `\nVGuard session summary:\n${messages}\n`,
     };
   }
 

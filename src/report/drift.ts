@@ -19,14 +19,14 @@ export interface DriftIssue {
  * identifying patterns that have changed in confidence or disappeared.
  */
 export function detectDrift(projectRoot: string): DriftIssue[] {
-  const conventionsPath = join(projectRoot, '.vibecheck', 'learned', 'conventions.json');
+  const conventionsPath = join(projectRoot, '.vguard', 'learned', 'conventions.json');
 
   if (!existsSync(conventionsPath)) {
     return [
       {
         convention: 'No baseline',
         severity: 'low',
-        description: 'No conventions.json found. Run `vibecheck learn` to establish a baseline.',
+        description: 'No conventions.json found. Run `vguard learn` to establish a baseline.',
       },
     ];
   }
@@ -40,7 +40,7 @@ export function detectDrift(projectRoot: string): DriftIssue[] {
       {
         convention: 'Invalid baseline',
         severity: 'medium',
-        description: 'conventions.json is malformed. Run `vibecheck learn` to regenerate.',
+        description: 'conventions.json is malformed. Run `vguard learn` to regenerate.',
       },
     ];
   }

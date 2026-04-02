@@ -9,7 +9,7 @@ import { resolveConfig } from '../../config/loader.js';
 import { getAllPresets } from '../../config/presets.js';
 import { getAllRules } from '../../engine/registry.js';
 import { readPerfEntries, calculatePerfStats, PERF_BUDGET_MS } from '../../engine/perf.js';
-import type { VibeCheckConfig } from '../../types.js';
+import type { VGuardConfig } from '../../types.js';
 
 interface CheckResult {
   name: string;
@@ -21,7 +21,7 @@ export async function doctorCommand(): Promise<void> {
   const projectRoot = process.cwd();
   const results: CheckResult[] = [];
 
-  console.log('\n  VibeCheck Doctor\n');
+  console.log('\n  VGuard Doctor\n');
 
   // 1. Check config file exists
   const discovered = discoverConfigFile(projectRoot);
@@ -29,7 +29,7 @@ export async function doctorCommand(): Promise<void> {
     results.push({
       name: 'Config file',
       status: 'fail',
-      message: 'No vibecheck config found. Run `vibecheck init`.',
+      message: 'No VGuard config found. Run `vguard init`.',
     });
     printResults(results);
     return;
@@ -45,7 +45,7 @@ export async function doctorCommand(): Promise<void> {
   try {
     const rawConfig = await readRawConfig(discovered);
     const presetMap = getAllPresets();
-    resolvedConfig = resolveConfig(rawConfig as VibeCheckConfig, presetMap);
+    resolvedConfig = resolveConfig(rawConfig as VGuardConfig, presetMap);
     results.push({
       name: 'Config valid',
       status: 'pass',
@@ -93,12 +93,12 @@ export async function doctorCommand(): Promise<void> {
   }
 
   // 5. Check pre-compiled config cache
-  const cachePath = join(projectRoot, '.vibecheck', 'cache', 'resolved-config.json');
+  const cachePath = join(projectRoot, '.vguard', 'cache', 'resolved-config.json');
   if (!existsSync(cachePath)) {
     results.push({
       name: 'Config cache',
       status: 'warn',
-      message: 'No pre-compiled config cache. Run `vibecheck generate` for faster hooks.',
+      message: 'No pre-compiled config cache. Run `vguard generate` for faster hooks.',
     });
   } else {
     results.push({
@@ -115,7 +115,7 @@ export async function doctorCommand(): Promise<void> {
       results.push({
         name: 'Claude Code hooks',
         status: 'fail',
-        message: 'No .claude/settings.json found. Run `vibecheck generate`.',
+        message: 'No .claude/settings.json found. Run `vguard generate`.',
       });
     } else {
       results.push({
@@ -126,12 +126,12 @@ export async function doctorCommand(): Promise<void> {
     }
 
     // Check hook scripts
-    const hookDir = join(projectRoot, '.vibecheck', 'hooks');
+    const hookDir = join(projectRoot, '.vguard', 'hooks');
     if (!existsSync(hookDir)) {
       results.push({
         name: 'Hook scripts',
         status: 'fail',
-        message: 'No hook scripts found. Run `vibecheck generate`.',
+        message: 'No hook scripts found. Run `vguard generate`.',
       });
     } else {
       results.push({
@@ -162,12 +162,12 @@ export async function doctorCommand(): Promise<void> {
   }
 
   // 8. Check node_modules
-  const vibecheckInModules = existsSync(join(projectRoot, 'node_modules', 'vibecheck'));
-  if (!vibecheckInModules) {
+  const vguardInModules = existsSync(join(projectRoot, 'node_modules', 'vguard'));
+  if (!vguardInModules) {
     results.push({
       name: 'node_modules',
       status: 'warn',
-      message: 'vibecheck not found in node_modules. Hook scripts may not work. Run `npm install`.',
+      message: 'VGuard not found in node_modules. Hook scripts may not work. Run `npm install`.',
     });
   }
 
@@ -187,8 +187,8 @@ function printResults(results: CheckResult[]): void {
 
   console.log();
   if (hasIssues) {
-    console.log('  Some issues found. Fix them and run `vibecheck doctor` again.\n');
+    console.log('  Some issues found. Fix them and run `vguard doctor` again.\n');
   } else {
-    console.log('  All checks passed. VibeCheck is healthy.\n');
+    console.log('  All checks passed. VGuard is healthy.\n');
   }
 }

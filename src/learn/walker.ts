@@ -9,7 +9,7 @@ const DEFAULT_EXCLUDE = [
   'build',
   '.git',
   'coverage',
-  '.vibecheck',
+  '.vguard',
   '__pycache__',
   '.venv',
   'vendor',

@@ -2,7 +2,7 @@ import inquirer from 'inquirer';
 import { writeFile, mkdir } from 'node:fs/promises';
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import type { VibeCheckConfig, AgentType } from '../../types.js';
+import type { VGuardConfig, AgentType } from '../../types.js';
 
 // Import to register presets and rules
 import '../../presets/index.js';
@@ -17,15 +17,15 @@ import { mergeSettings } from '../../adapters/claude-code/settings-merger.js';
 export async function initCommand(): Promise<void> {
   const projectRoot = process.cwd();
 
-  console.log('\n  VibeCheck — AI Coding Guardrails\n');
+  console.log('\n  VGuard — AI Coding Guardrails\n');
 
   // Check if already initialized
   if (
-    existsSync(join(projectRoot, 'vibecheck.config.ts')) ||
-    existsSync(join(projectRoot, '.vibecheckrc.json'))
+    existsSync(join(projectRoot, 'vguard.config.ts')) ||
+    existsSync(join(projectRoot, '.vguardrc.json'))
   ) {
-    console.log('  VibeCheck is already configured in this project.');
-    console.log('  Run `vibecheck generate` to regenerate hooks.\n');
+    console.log('  VGuard is already configured in this project.');
+    console.log('  Run `vguard generate` to regenerate hooks.\n');
     return;
   }
 
@@ -72,7 +72,7 @@ export async function initCommand(): Promise<void> {
     .map((b: string) => b.trim())
     .filter(Boolean);
 
-  const config: VibeCheckConfig = {
+  const config: VGuardConfig = {
     presets: answers.presets as string[],
     agents: answers.agents as AgentType[],
     rules: {
@@ -83,13 +83,13 @@ export async function initCommand(): Promise<void> {
   };
 
   // Write config file
-  const configContent = `import { defineConfig } from '@solanticai/vibecheck';
+  const configContent = `import { defineConfig } from '@solanticai/vguard';
 
 export default defineConfig(${JSON.stringify(config, null, 2)});
 `;
 
-  await writeFile(join(projectRoot, 'vibecheck.config.ts'), configContent, 'utf-8');
-  console.log('\n  Created vibecheck.config.ts');
+  await writeFile(join(projectRoot, 'vguard.config.ts'), configContent, 'utf-8');
+  console.log('\n  Created vguard.config.ts');
 
   // Resolve config
   const presetMap = getAllPresets();
@@ -97,7 +97,7 @@ export default defineConfig(${JSON.stringify(config, null, 2)});
 
   // Compile config for fast hook loading
   await compileConfig(resolvedConfig, projectRoot);
-  console.log('  Created .vibecheck/cache/resolved-config.json');
+  console.log('  Created .vguard/cache/resolved-config.json');
 
   // Generate adapter output
   if ((answers.agents as string[]).includes('claude-code')) {
@@ -121,8 +121,8 @@ export default defineConfig(${JSON.stringify(config, null, 2)});
 
   // Summary
   const ruleCount = resolvedConfig.rules.size;
-  console.log(`\n  VibeCheck initialized with ${ruleCount} active rules.`);
-  console.log('  Run `vibecheck doctor` to verify your setup.\n');
+  console.log(`\n  VGuard initialized with ${ruleCount} active rules.`);
+  console.log('  Run `vguard doctor` to verify your setup.\n');
 }
 
 function detectFramework(projectRoot: string): string | null {

@@ -130,8 +130,8 @@ export interface LearnConfig {
   ignorePaths?: string[];
 }
 
-/** User-facing config (vibecheck.config.ts) */
-export interface VibeCheckConfig {
+/** User-facing config (vguard.config.ts) */
+export interface VGuardConfig {
   /** Severity profile: strict, standard, relaxed, or audit */
   profile?: 'strict' | 'standard' | 'relaxed' | 'audit';
   /** Preset names to apply (e.g., ["nextjs-15", "typescript-strict"]) */
@@ -155,14 +155,14 @@ export interface MonorepoConfig {
   /** Glob patterns for workspace packages (e.g., ["apps/*", "packages/*"]) */
   packages: string[];
   /** Per-workspace config overrides keyed by relative path */
-  overrides?: Record<string, Partial<Pick<VibeCheckConfig, 'presets' | 'rules'>>>;
+  overrides?: Record<string, Partial<Pick<VGuardConfig, 'presets' | 'rules'>>>;
 }
 
 /** Cloud sync settings */
 export interface CloudConfig {
   /** Enable Cloud sync */
   enabled?: boolean;
-  /** Cloud project ID (set by `vibecheck cloud connect`) */
+  /** Cloud project ID (set by `vguard cloud connect`) */
   projectId?: string;
   /** Auto-sync on Stop hook (default: true) */
   autoSync?: boolean;
@@ -234,8 +234,8 @@ export interface Adapter {
 
 // ─── Plugin ─────────────────────────────────────────────────────────────────
 
-/** A VibeCheck plugin package */
-export interface VibeCheckPlugin {
+/** A VGuard plugin package */
+export interface VGuardPlugin {
   /** Plugin name (should match npm package name) */
   name: string;
   /** Plugin version */

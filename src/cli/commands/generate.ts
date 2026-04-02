@@ -12,27 +12,27 @@ import { claudeCodeAdapter } from '../../adapters/claude-code/adapter.js';
 import { cursorAdapter } from '../../adapters/cursor/adapter.js';
 import { githubActionsAdapter } from '../../adapters/github-actions/adapter.js';
 import { mergeSettings } from '../../adapters/claude-code/settings-merger.js';
-import type { VibeCheckConfig, GeneratedFile } from '../../types.js';
+import type { VGuardConfig, GeneratedFile } from '../../types.js';
 
 export async function generateCommand(): Promise<void> {
   const projectRoot = process.cwd();
 
-  console.log('\n  VibeCheck — Regenerating hooks...\n');
+  console.log('\n  VGuard — Regenerating hooks...\n');
 
   // Load config
   const discovered = discoverConfigFile(projectRoot);
   if (!discovered) {
-    console.error('  No vibecheck config found. Run `vibecheck init` first.');
+    console.error('  No VGuard config found. Run `vguard init` first.');
     process.exit(1);
   }
 
   const rawConfig = await readRawConfig(discovered);
   const presetMap = getAllPresets();
-  const resolvedConfig = resolveConfig(rawConfig as VibeCheckConfig, presetMap);
+  const resolvedConfig = resolveConfig(rawConfig as VGuardConfig, presetMap);
 
   // Compile config cache
   await compileConfig(resolvedConfig, projectRoot);
-  console.log('  Updated .vibecheck/cache/resolved-config.json');
+  console.log('  Updated .vguard/cache/resolved-config.json');
 
   // Generate for each agent
   const writeGeneratedFile = async (file: GeneratedFile) => {

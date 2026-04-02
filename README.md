@@ -1,4 +1,4 @@
-# VibeCheck
+# VGuard
 
 **AI coding guardrails that actually enforce.** Runtime quality controls for Claude Code, Cursor, Codex, and more.
 
@@ -10,7 +10,7 @@ AI coding tools are everywhere. **84% of developers** use them daily. But only *
 
 The current solutions? Monolithic prompt libraries with 136+ skills you'll never use. Methodology-locked frameworks that slow you down 3.7x. Or writing your own hooks from scratch every time.
 
-**VibeCheck is different.** It's a composable, agent-agnostic guardrails framework that:
+**VGuard is different.** It's a composable, agent-agnostic guardrails framework that:
 
 - **Blocks bad code at runtime** -- not just suggestions, actual enforcement
 - **Works across AI tools** -- Claude Code, Cursor, Codex, OpenCode
@@ -20,8 +20,8 @@ The current solutions? Monolithic prompt libraries with 136+ skills you'll never
 ## Quick Start
 
 ```bash
-npm install -D @solanticai/vibecheck
-npx vibecheck init
+npm install -D @solanticai/vguard
+npx vguard init
 ```
 
 Answer 4 questions and you have working guardrails. The init wizard detects your framework, asks which AI tools you use, and generates everything.
@@ -30,10 +30,10 @@ Answer 4 questions and you have working guardrails. The init wizard detects your
 
 ### Runtime Enforcement (Claude Code)
 
-VibeCheck generates hook scripts that run **before** your AI agent makes changes. Bad code gets blocked with a clear explanation and suggested fix.
+VGuard generates hook scripts that run **before** your AI agent makes changes. Bad code gets blocked with a clear explanation and suggested fix.
 
 ```
-BLOCKED by vibecheck [security/branch-protection]
+BLOCKED by VGuard [security/branch-protection]
 
 Cannot write to files on branch 'main'.
 Create a feature branch first: git checkout -b feat/your-change
@@ -41,7 +41,7 @@ Create a feature branch first: git checkout -b feat/your-change
 
 ### Advisory Guidance (Cursor, Codex, OpenCode)
 
-For agents without hook support, VibeCheck generates configuration files that guide AI behavior.
+For agents without hook support, VGuard generates configuration files that guide AI behavior.
 
 | Agent           | Enforcement          | Mechanism                    |
 | --------------- | -------------------- | ---------------------------- |
@@ -72,7 +72,7 @@ For agents without hook support, VibeCheck generates configuration files that gu
 Presets bundle ecosystem-specific rules:
 
 ```typescript
-import { defineConfig } from '@solanticai/vibecheck';
+import { defineConfig } from '@solanticai/vguard';
 
 export default defineConfig({
   presets: ['nextjs-15', 'typescript-strict'],
@@ -88,7 +88,7 @@ export default defineConfig({
 ## Configuration
 
 ```typescript
-import { defineConfig } from '@solanticai/vibecheck';
+import { defineConfig } from '@solanticai/vguard';
 
 export default defineConfig({
   presets: ['nextjs-15'],
@@ -104,13 +104,13 @@ export default defineConfig({
 
 ## CLI
 
-| Command                           | Description                     |
-| --------------------------------- | ------------------------------- |
-| `vibecheck init`                  | Interactive setup wizard        |
-| `vibecheck add <rule\|preset>`    | Add a rule or preset            |
-| `vibecheck remove <rule\|preset>` | Remove a rule or preset         |
-| `vibecheck generate`              | Regenerate hook scripts         |
-| `vibecheck doctor`                | Validate config and hook health |
+| Command                        | Description                     |
+| ------------------------------ | ------------------------------- |
+| `vguard init`                  | Interactive setup wizard        |
+| `vguard add <rule\|preset>`    | Add a rule or preset            |
+| `vguard remove <rule\|preset>` | Remove a rule or preset         |
+| `vguard generate`              | Regenerate hook scripts         |
+| `vguard doctor`                | Validate config and hook health |
 
 ## How It Works
 
@@ -121,7 +121,7 @@ Developer prompt
   AI Agent (Claude Code / Cursor / Codex)
       |
       v
-  VibeCheck hooks  <--  vibecheck.config.ts
+  VGuard hooks  <--  vguard.config.ts
       |                     |
       +-- PASS --------->  Change applied
       |
@@ -133,12 +133,12 @@ For Claude Code, hooks execute as subprocesses before each tool use. They read t
 
 ### The Edit Rule Factory
 
-VibeCheck's key innovation: **Edit rules only flag newly introduced problems.** If a pattern existed before the edit, it's pre-existing and won't be flagged. This allows incremental improvement without forcing you to fix every legacy issue first.
+VGuard's key innovation: **Edit rules only flag newly introduced problems.** If a pattern existed before the edit, it's pre-existing and won't be flagged. This allows incremental improvement without forcing you to fix every legacy issue first.
 
 ## Creating Custom Rules
 
 ```typescript
-import type { Rule } from '@solanticai/vibecheck';
+import type { Rule } from '@solanticai/vguard';
 
 export const noConsoleLog: Rule = {
   id: 'custom/no-console-log',

@@ -13,7 +13,7 @@ export async function addCommand(id: string): Promise<void> {
   const configPath = findConfigPath(projectRoot);
 
   if (!configPath) {
-    console.error('  No vibecheck config found. Run `vibecheck init` first.');
+    console.error('  No VGuard config found. Run `vguard init` first.');
     process.exit(1);
   }
 
@@ -51,26 +51,26 @@ export async function addCommand(id: string): Promise<void> {
     await writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
   } else {
     // For TypeScript configs, we append a comment with instructions
-    console.log(`\n  Add the following to your vibecheck.config.ts:\n`);
+    console.log(`\n  Add the following to your vguard.config.ts:\n`);
     if (isPreset) {
       console.log(`    presets: [..., '${actualId}'],`);
     } else {
       console.log(`    rules: { ..., '${actualId}': true },`);
     }
-    console.log(`\n  Then run \`vibecheck generate\` to update hooks.\n`);
+    console.log(`\n  Then run \`vguard generate\` to update hooks.\n`);
     return;
   }
 
   console.log(`  Added ${isPreset ? 'preset' : 'rule'}: ${actualId}`);
-  console.log('  Run `vibecheck generate` to update hooks.\n');
+  console.log('  Run `vguard generate` to update hooks.\n');
 }
 
 function findConfigPath(projectRoot: string): string | null {
   const candidates = [
-    'vibecheck.config.ts',
-    'vibecheck.config.js',
-    'vibecheck.config.mjs',
-    '.vibecheckrc.json',
+    'vguard.config.ts',
+    'vguard.config.js',
+    'vguard.config.mjs',
+    '.vguardrc.json',
   ];
 
   for (const file of candidates) {

@@ -1,13 +1,13 @@
 {
-  "name": "@solanticai/vibecheck",
-  "version": "1.0.2",
+  "name": "@solanticai/vguard",
+  "version": "1.0.0-beta.1",
   "description": "AI coding guardrails framework. Runtime-enforced quality controls for Claude Code, Cursor, Codex, and more.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "vibecheck": "dist/cli.cjs"
+    "vguard": "dist/cli.cjs"
   },
   "exports": {
     ".": {
@@ -49,13 +49,13 @@
   ],
   "author": "SolanticAi",
   "license": "Apache-2.0",
-  "homepage": "https://solanticai.github.io/VibeCheck/",
+  "homepage": "https://vguard.dev",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SolanticAi/vibecheck.git"
+    "url": "git+https://github.com/SolanticAi/vguard.git"
   },
   "bugs": {
-    "url": "https://github.com/SolanticAi/vibecheck/issues"
+    "url": "https://github.com/SolanticAi/vguard/issues"
   },
   "publishConfig": {
     "access": "public",

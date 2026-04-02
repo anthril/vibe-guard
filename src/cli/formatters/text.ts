@@ -3,7 +3,7 @@ import type { ScanResult } from '../../engine/scanner.js';
 export function formatText(result: ScanResult): string {
   const lines: string[] = [];
 
-  lines.push(`\nVibeCheck Lint — ${result.filesScanned} files scanned\n`);
+  lines.push(`\nVGuard Lint — ${result.filesScanned} files scanned\n`);
 
   if (result.issues.length === 0) {
     lines.push('  No issues found.\n');

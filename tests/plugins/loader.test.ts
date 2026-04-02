@@ -6,10 +6,10 @@ import '../../src/rules/index.js';
 
 describe('loadPlugins', () => {
   it('should return errors for non-existent plugins', async () => {
-    const result = await loadPlugins(['vibecheck-plugin-nonexistent']);
+    const result = await loadPlugins(['vguard-plugin-nonexistent']);
     expect(result.loaded).toHaveLength(0);
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0].plugin).toBe('vibecheck-plugin-nonexistent');
+    expect(result.errors[0].plugin).toBe('vguard-plugin-nonexistent');
   });
 
   it('should handle empty plugin list', async () => {

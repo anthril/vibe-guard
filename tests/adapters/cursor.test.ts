@@ -28,7 +28,7 @@ describe('Cursor adapter', () => {
     const files = await cursorAdapter.generate(makeConfig(), '/project');
     const cursorRulesFile = files.find((f) => f.path === '.cursorrules');
     expect(cursorRulesFile).toBeDefined();
-    expect(cursorRulesFile!.content).toContain('VibeCheck Rules');
+    expect(cursorRulesFile!.content).toContain('VGuard Rules');
     expect(cursorRulesFile!.content).toContain('advisory');
   });
 

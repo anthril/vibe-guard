@@ -4,8 +4,8 @@ import { join } from 'node:path';
 import { aggregateReport } from '../../src/report/aggregator.js';
 import { generateMarkdownReport } from '../../src/report/markdown.js';
 
-const TEST_DIR = join(process.cwd(), '.vibecheck-test-report');
-const LOG_DIR = join(TEST_DIR, '.vibecheck', 'data');
+const TEST_DIR = join(process.cwd(), '.vguard-test-report');
+const LOG_DIR = join(TEST_DIR, '.vguard', 'data');
 const LOG_PATH = join(LOG_DIR, 'rule-hits.jsonl');
 
 beforeEach(() => {
@@ -135,7 +135,7 @@ describe('generateMarkdownReport', () => {
     };
 
     const md = generateMarkdownReport(data);
-    expect(md).toContain('# VibeCheck Quality Report');
+    expect(md).toContain('# VGuard Quality Report');
     expect(md).toContain('security/branch-protection');
     expect(md).toContain('50/100');
     expect(md).toContain('Rule Hit Frequency');

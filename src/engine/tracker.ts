@@ -12,7 +12,7 @@ export interface RuleHitRecord {
   tool: string;
 }
 
-const LOG_FILENAME = '.vibecheck/data/rule-hits.jsonl';
+const LOG_FILENAME = '.vguard/data/rule-hits.jsonl';
 const MAX_LOG_SIZE = 10 * 1024 * 1024; // 10MB
 
 /**

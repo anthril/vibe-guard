@@ -14,7 +14,7 @@ export function formatGitHubActions(result: ScanResult): string {
   }
 
   if (result.issues.length === 0) {
-    lines.push('::notice::VibeCheck: No issues found');
+    lines.push('::notice::VGuard: No issues found');
   }
 
   return lines.join('\n');

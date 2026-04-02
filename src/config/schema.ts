@@ -48,7 +48,7 @@ export const monorepoConfigSchema = z
 /** Valid npm package name pattern (scoped or unscoped) */
 const npmPackageNamePattern = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
 
-/** Schema for the complete user config (vibecheck.config.ts) */
+/** Schema for the complete user config (vguard.config.ts) */
 export const vibeCheckConfigSchema = z.object({
   profile: z.enum(['strict', 'standard', 'relaxed', 'audit']).optional(),
   presets: z.array(z.string()).optional(),

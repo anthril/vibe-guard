@@ -1,6 +1,6 @@
 import { readCredentials, getValidCredentials } from './credentials.js';
 
-const DEFAULT_API_URL = process.env.VIBECHECK_CLOUD_URL ?? 'https://api.vibecheck.dev';
+const DEFAULT_API_URL = process.env.VGUARD_CLOUD_URL ?? 'https://api.vguard.dev';
 
 export interface CloudClientOptions {
   apiUrl?: string;
@@ -14,8 +14,8 @@ export interface CloudApiError {
 }
 
 /**
- * Lightweight HTTP client for the VibeCheck Cloud API.
- * Reads API URL from: options > credentials.apiUrl > VIBECHECK_CLOUD_URL env > default.
+ * Lightweight HTTP client for the VGuard Cloud API.
+ * Reads API URL from: options > credentials.apiUrl > VGUARD_CLOUD_URL env > default.
  * Auto-refreshes expired access tokens when a refresh token is stored.
  */
 export class CloudClient {
@@ -80,7 +80,7 @@ export class CloudClient {
   private async authenticatedRequest(path: string, init?: RequestInit): Promise<unknown> {
     const credentials = await getValidCredentials();
     if (!credentials) {
-      throw new Error('Not logged in or session expired. Run `npx vibecheck cloud login` first.');
+      throw new Error('Not logged in or session expired. Run `npx vguard cloud login` first.');
     }
 
     return this.request(path, {
@@ -103,7 +103,7 @@ export class CloudClient {
       const message = err instanceof Error ? err.message : 'Network error';
       throw new Error(
         `Cannot reach ${this.apiUrl} — ${message}. ` +
-          'Set VIBECHECK_CLOUD_URL or run `npx vibecheck cloud login` to configure.',
+          'Set VGUARD_CLOUD_URL or run `npx vguard cloud login` to configure.',
         { cause: err },
       );
     }

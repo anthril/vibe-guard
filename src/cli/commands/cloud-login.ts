@@ -3,14 +3,14 @@ import crypto from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { readCredentials, writeCredentials, getCredentialsPath } from '../../cloud/credentials.js';
 
-const DEFAULT_CLOUD_URL = process.env.VIBECHECK_CLOUD_URL ?? 'https://app.vibecheck.dev';
+const DEFAULT_CLOUD_URL = process.env.VGUARD_CLOUD_URL ?? 'https://app.vguard.dev';
 const DEFAULT_SUPABASE_URL =
-  process.env.VIBECHECK_SUPABASE_URL ?? 'https://mpisrdadthdhpvgimtzv.supabase.co';
+  process.env.VGUARD_SUPABASE_URL ?? 'https://mpisrdadthdhpvgimtzv.supabase.co';
 const DEFAULT_OAUTH_CLIENT_ID =
-  process.env.VIBECHECK_OAUTH_CLIENT_ID ?? 'd49f2c6e-473a-4b94-acdf-9f282cc9a278';
+  process.env.VGUARD_OAUTH_CLIENT_ID ?? 'd49f2c6e-473a-4b94-acdf-9f282cc9a278';
 
 /**
- * `vibecheck cloud login`
+ * `vguard cloud login`
  *
  * Two modes:
  * 1. Interactive (default): Opens browser for OAuth 2.1 PKCE flow
@@ -26,7 +26,7 @@ export async function cloudLoginCommand(
     noInteractive?: boolean;
   } = {},
 ): Promise<void> {
-  console.log('\n  VibeCheck Cloud — Login\n');
+  console.log('\n  VGuard Cloud — Login\n');
 
   // Manual token flow (CI/headless)
   if (options.token) {
@@ -75,7 +75,7 @@ export async function cloudLoginCommand(
     if (email) console.log(`  Logged in as ${email}`);
     console.log(`  API URL: ${cloudUrl}`);
     console.log('  Refresh token stored — sessions will auto-renew.');
-    console.log('\n  Next step: run `npx vibecheck cloud connect` to register this project.\n');
+    console.log('\n  Next step: run `npx vguard cloud connect` to register this project.\n');
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Login failed';
     console.error(`  ${message}\n`);
@@ -122,7 +122,7 @@ function handleTokenLogin(options: {
   } else {
     console.log('  No refresh token — session will expire in ~1 hour.');
   }
-  console.log('\n  Next step: run `npx vibecheck cloud connect` to register this project.\n');
+  console.log('\n  Next step: run `npx vguard cloud connect` to register this project.\n');
 }
 
 /**

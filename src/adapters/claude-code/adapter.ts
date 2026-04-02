@@ -2,14 +2,14 @@ import type { Adapter, GeneratedFile, ResolvedConfig, HookEvent } from '../../ty
 import { getAllRules } from '../../engine/registry.js';
 import { generateHookScript } from './hook-generator.js';
 
-/** Hook event types that VibeCheck generates scripts for */
+/** Hook event types that VGuard generates scripts for */
 const HOOK_EVENTS: HookEvent[] = ['PreToolUse', 'PostToolUse', 'Stop'];
 
 /**
  * Claude Code adapter.
  *
  * Generates:
- * 1. Hook scripts (one per event type) in .vibecheck/hooks/
+ * 1. Hook scripts (one per event type) in .vguard/hooks/
  * 2. settings.json entries in .claude/settings.json
  */
 export const claudeCodeAdapter: Adapter = {
@@ -49,7 +49,7 @@ export const claudeCodeAdapter: Adapter = {
 
       const hookScript = generateHookScript(event);
       files.push({
-        path: `.vibecheck/hooks/vibecheck-${event.toLowerCase()}.js`,
+        path: `.vguard/hooks/vguard-${event.toLowerCase()}.js`,
         content: hookScript,
         mergeStrategy: 'overwrite',
       });
@@ -78,7 +78,7 @@ function buildSettingsHooks(
 
   for (const [event, tools] of activeEvents) {
     const toolMatcher = Array.from(tools).join('|');
-    const hookScriptPath = `.vibecheck/hooks/vibecheck-${event.toLowerCase()}.js`;
+    const hookScriptPath = `.vguard/hooks/vguard-${event.toLowerCase()}.js`;
 
     const hookEntry: Record<string, unknown> = {
       hooks: [

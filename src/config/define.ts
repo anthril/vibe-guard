@@ -1,13 +1,13 @@
-import type { VibeCheckConfig } from '../types.js';
+import type { VGuardConfig } from '../types.js';
 
 /**
- * Typed helper for vibecheck.config.ts files.
+ * Typed helper for vguard.config.ts files.
  * Provides IDE autocomplete and type checking.
  *
  * @example
  * ```typescript
- * // vibecheck.config.ts
- * import { defineConfig } from '@solanticai/vibecheck';
+ * // vguard.config.ts
+ * import { defineConfig } from '@solanticai/vguard';
  *
  * export default defineConfig({
  *   presets: ['nextjs-15', 'tailwind'],
@@ -15,6 +15,6 @@ import type { VibeCheckConfig } from '../types.js';
  * });
  * ```
  */
-export function defineConfig(config: VibeCheckConfig): VibeCheckConfig {
+export function defineConfig(config: VGuardConfig): VGuardConfig {
   return config;
 }

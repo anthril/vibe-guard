@@ -29,7 +29,7 @@ export function getPromotionSuggestions(
 }
 
 /**
- * Merge promotion suggestions into a vibecheck config rules object.
+ * Merge promotion suggestions into a VGuard config rules object.
  * Deduplicates by ruleId and merges configs.
  */
 export function mergePromotions(
@@ -49,18 +49,18 @@ export function mergePromotions(
 
 /**
  * Generate a TypeScript rule file from a promotion suggestion.
- * Writes to .vibecheck/rules/custom/<ruleId>.ts
+ * Writes to .vguard/rules/custom/<ruleId>.ts
  */
 export async function generateRuleFile(
   suggestion: PromotionSuggestion,
   projectRoot: string,
 ): Promise<string> {
   const safeName = suggestion.ruleId.replace('/', '-');
-  const outputPath = join(projectRoot, '.vibecheck', 'rules', 'custom', `${safeName}.ts`);
+  const outputPath = join(projectRoot, '.vguard', 'rules', 'custom', `${safeName}.ts`);
   await mkdir(dirname(outputPath), { recursive: true });
 
   const configJson = JSON.stringify(suggestion.config, null, 2);
-  const content = `import type { Rule } from '@solanticai/vibecheck';
+  const content = `import type { Rule } from '@solanticai/vguard';
 
 /**
  * Auto-generated rule from convention learning.

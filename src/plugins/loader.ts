@@ -1,4 +1,4 @@
-import type { VibeCheckPlugin } from '../types.js';
+import type { VGuardPlugin } from '../types.js';
 import { registerRule } from '../engine/registry.js';
 import { registerPreset } from '../config/presets.js';
 import { validatePlugin } from './validator.js';
@@ -15,7 +15,7 @@ export interface PluginLoadResult {
 /**
  * Load and register plugins from config.
  *
- * Plugins are npm packages that export a VibeCheckPlugin object.
+ * Plugins are npm packages that export a VGuardPlugin object.
  * They can provide additional rules and presets.
  */
 export async function loadPlugins(pluginNames: string[]): Promise<PluginLoadResult> {
@@ -73,13 +73,13 @@ export async function loadPlugins(pluginNames: string[]): Promise<PluginLoadResu
  * Import a plugin package dynamically.
  * Supports both default and named exports.
  */
-async function importPlugin(name: string): Promise<VibeCheckPlugin> {
+async function importPlugin(name: string): Promise<VGuardPlugin> {
   // Try dynamic import first (ESM)
   try {
     const mod = await import(name);
     const plugin = mod.default ?? mod;
 
-    if (isVibeCheckPlugin(plugin)) {
+    if (isVGuardPlugin(plugin)) {
       return plugin;
     }
   } catch {
@@ -93,7 +93,7 @@ async function importPlugin(name: string): Promise<VibeCheckPlugin> {
     const mod = require(name);
     const plugin = mod.default ?? mod;
 
-    if (isVibeCheckPlugin(plugin)) {
+    if (isVGuardPlugin(plugin)) {
       return plugin;
     }
   } catch {
@@ -103,13 +103,13 @@ async function importPlugin(name: string): Promise<VibeCheckPlugin> {
   throw new Error(`Could not import plugin "${name}". Is it installed?`);
 }
 
-function isVibeCheckPlugin(obj: unknown): obj is VibeCheckPlugin {
+function isVGuardPlugin(obj: unknown): obj is VGuardPlugin {
   return (
     typeof obj === 'object' &&
     obj !== null &&
     'name' in obj &&
     'version' in obj &&
-    typeof (obj as VibeCheckPlugin).name === 'string' &&
-    typeof (obj as VibeCheckPlugin).version === 'string'
+    typeof (obj as VGuardPlugin).name === 'string' &&
+    typeof (obj as VGuardPlugin).version === 'string'
   );
 }

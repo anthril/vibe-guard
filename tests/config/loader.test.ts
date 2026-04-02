@@ -87,7 +87,7 @@ describe('resolveConfig', () => {
 
   it('should throw on invalid config', () => {
     expect(() => resolveConfig({ agents: ['invalid-agent' as 'claude-code'] })).toThrow(
-      'Invalid vibecheck config',
+      'Invalid VGuard config',
     );
   });
 

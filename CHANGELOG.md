@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- DEVELOPERS.md with full developer guide (setup, architecture, testing, extension guides)
+- Makefile rewritten for VGuard contributor sync across vibe-guard and vibe-guard-cloud repos
+
 ## [1.0.0] - 2026-04-02
 
 First stable release.

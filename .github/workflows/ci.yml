@@ -13,14 +13,19 @@ concurrency:
 jobs:
   # ── Gate: PRs to master must bump version and update changelog ──
   release-checks:
-    if: github.event_name == 'pull_request' && github.base_ref == 'master'
     runs-on: ubuntu-latest
     steps:
+      - name: Skip — not a PR to master
+        if: ${{ !(github.event_name == 'pull_request' && github.base_ref == 'master') }}
+        run: echo "Not a PR to master — release checks not required."
+
       - uses: actions/checkout@v5
+        if: github.event_name == 'pull_request' && github.base_ref == 'master'
         with:
           fetch-depth: 0
 
       - name: Check package.json version was bumped
+        if: github.event_name == 'pull_request' && github.base_ref == 'master'
         run: |
           # Get the version on master (base branch)
           MASTER_VERSION=$(git show origin/master:package.json | python3 -c "import sys,json; print(json.load(sys.stdin)['version'])")
@@ -38,6 +43,7 @@ jobs:
           echo "Version bumped: $MASTER_VERSION → $PR_VERSION"
 
       - name: Check CHANGELOG.md was updated
+        if: github.event_name == 'pull_request' && github.base_ref == 'master'
         run: |
           # Check if CHANGELOG.md has changes compared to master
           if git diff --quiet origin/master -- CHANGELOG.md; then

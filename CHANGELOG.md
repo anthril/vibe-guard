@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Prettier formatting applied to 25 files (tests, docs, fixtures)
+- CI release-checks job now passes (instead of skipping) on push events
 
 ## [1.1.0] - 2026-04-03
 

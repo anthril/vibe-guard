@@ -5,7 +5,7 @@ vi.mock('../../src/cloud/credentials.js', () => ({
   getValidCredentials: vi.fn(() => null),
 }));
 
-import { readCredentials, getValidCredentials } from '../../src/cloud/credentials.js';
+import { getValidCredentials } from '../../src/cloud/credentials.js';
 import { CloudClient } from '../../src/cloud/client.js';
 
 describe('CloudClient', () => {

@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { ResolvedConfig, Rule } from '../../src/types.js';
+import { describe, it, expect } from 'vitest';
+import type { ResolvedConfig } from '../../src/types.js';
 
 // Register rules so bundler can find them
 import '../../src/presets/index.js';

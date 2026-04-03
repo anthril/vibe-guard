@@ -3,17 +3,9 @@ import { join } from 'node:path';
 
 // Build paths using native join so keys match on Windows and Linux
 const ROOT = join('/project');
-const SRC = join('/project', 'src');
-const INDEX_TS = join('/project', 'src', 'index.ts');
-const APP_TSX = join('/project', 'src', 'app.tsx');
-const UTILS_JS = join('/project', 'src', 'utils.js');
-const NODE_MODULES = join('/project', 'node_modules');
-const DIST = join('/project', 'dist');
-const README = join('/project', 'README.md');
-const IMAGE = join('/project', 'image.png');
 
-vi.mock('node:fs', () => {
-  const { join: pathJoin } = require('node:path');
+vi.mock('node:fs', async () => {
+  const { join: pathJoin } = await import('node:path');
 
   const root = pathJoin('/project');
   const src = pathJoin('/project', 'src');

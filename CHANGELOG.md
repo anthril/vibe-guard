@@ -7,10 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-04-03
+
 ### Added
 
 - DEVELOPERS.md with full developer guide (setup, architecture, testing, extension guides)
 - Makefile rewritten for VGuard contributor sync across vibe-guard and vibe-guard-cloud repos
+
+### Fixed
+
+- Lint errors in test files: removed unused imports and variables across 5 test files
+- Replaced `require()` with dynamic `import()` in walker test to satisfy ESLint no-require-imports rule
 
 ## [1.0.0] - 2026-04-02
 

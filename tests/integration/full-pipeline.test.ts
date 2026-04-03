@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { Rule, ResolvedConfig, ResolvedRuleConfig } from '../../src/types.js';
+import { describe, it, expect, beforeEach } from 'vitest';
+import type { Rule } from '../../src/types.js';
 import { clearRegistry, registerRules } from '../../src/engine/registry.js';
 import { resolveRules } from '../../src/engine/resolver.js';
 import { runRules } from '../../src/engine/runner.js';

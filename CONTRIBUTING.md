@@ -21,12 +21,14 @@ master          ← Production. Only receives squash merges from dev via PR.
 ```
 
 1. **Start from `dev`**: Always branch off `dev` for new work.
+
    ```bash
    git checkout dev && git pull origin dev
    git checkout -b feature/my-feature
    ```
 
 2. **Open a PR targeting `dev`**: Push your branch and create a pull request.
+
    ```bash
    git push -u origin feature/my-feature
    ```

@@ -67,19 +67,18 @@ Use these project commands for common development tasks:
 | `/project:add-preset` | Scaffold a new preset for a tech stack |
 | `/project:run-tests` | Run test suite and analyze failures |
 | `/project:build` | Build, type-check, lint, and verify dist output |
-| `/project:release` | Guide through version bump, changelog, and release |
 | `/project:adapter-check` | Verify all adapter outputs are correct |
-| `/project:publish-changelog` | Publish changelog discussion to GitHub after release |
 
 ## Skills
 
-Use these skills for scaffolding new components:
+Use these skills for scaffolding and release:
 
-| Skill | Trigger | What It Creates |
-|-------|---------|-----------------|
+| Skill | Trigger | What It Does |
+|-------|---------|--------------|
 | `/new-rule` | "create a rule", "add rule" | Rule file + test + registration |
 | `/new-preset` | "create a preset", "add preset" | Preset file + registration |
 | `/new-adapter` | "add adapter", "support new agent" | Adapter file + type updates |
+| `/release` | "release", "publish", "bump version" | Full release: version bump, changelog, checks, PR, CI monitoring, changelog discussion |
 
 ## Adding a New Rule
 
@@ -128,4 +127,3 @@ Each adapter in `src/adapters/` generates agent-specific files:
 - **`preflight`** — checks if PR merge, version unpublished, tag missing
 - **`validate`** — full CI (lint, format, type-check, test, build)
 - **`publish`** — npm publish with OIDC provenance, git tag, GitHub Release
-- **`changelog`** — creates a GitHub Discussion post in the Changelog category with version notes and commit list

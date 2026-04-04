@@ -7,9 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
+## [1.3.0] - 2026-04-04
 
-- Resolved merge conflicts from master
+### Added
+
+- 10 new built-in rules (25 → 35 total):
+  - `security/unsafe-eval` — blocks eval(), new Function(), string setTimeout
+  - `security/no-hardcoded-urls` — warns about hardcoded localhost and API URLs
+  - `security/xss-prevention` — warns about dangerouslySetInnerHTML, innerHTML, v-html
+  - `security/sql-injection` — blocks string-interpolated SQL queries
+  - `quality/no-any-type` — warns about `any` type usage in TypeScript
+  - `quality/error-handling` — warns about empty catch blocks
+  - `quality/a11y-jsx` — accessibility checks for JSX (missing alt, onClick on divs)
+  - `quality/magic-numbers` — flags numeric literals that should be named constants
+  - `workflow/branch-naming` — enforces branch naming conventions (feature/, fix/, chore/)
+  - `workflow/lockfile-consistency` — reminds to update lockfile after dependency changes
+- 4 new presets (14 → 18 total): `vue`, `remix`, `prisma`, `express`
+- `/release` skill for automated release lifecycle (version bump, changelog, PR, CI, discussion)
+- Cloud streaming module for real-time rule hit telemetry
+
+### Changed
+
+- Updated 7 existing presets with new security and quality rules:
+  - `nextjs-15`: added unsafe-eval, no-hardcoded-urls, error-handling, a11y-jsx
+  - `typescript-strict`: added no-any-type, error-handling, unsafe-eval
+  - `react-19`: added a11y-jsx, xss-prevention
+  - `supabase`: added sql-injection
+  - `django`: added xss-prevention, sql-injection
+  - `fastapi`: added sql-injection
+  - `laravel`: added xss-prevention, sql-injection
+- Publish workflow: removed automated changelog discussion job (moved to `/release` skill)
+- Cloud init flow updated for improved authentication handling
+
+### Removed
+
+- `/project:release` command (replaced by `/release` skill)
+- `/project:publish-changelog` command (replaced by `/release` skill)
+- Automated changelog discussion job from publish workflow
 
 ## [1.1.2] - 2026-04-03
 

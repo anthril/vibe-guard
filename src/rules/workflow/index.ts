@@ -6,6 +6,8 @@ import { reviewGate } from './review-gate.js';
 import { todoTracker } from './todo-tracker.js';
 import { changelogReminder } from './changelog-reminder.js';
 import { formatOnSave } from './format-on-save.js';
+import { branchNaming } from './branch-naming.js';
+import { lockfileConsistency } from './lockfile-consistency.js';
 
 export const workflowRules: Rule[] = [
   commitConventions,
@@ -15,6 +17,8 @@ export const workflowRules: Rule[] = [
   todoTracker,
   changelogReminder,
   formatOnSave,
+  branchNaming,
+  lockfileConsistency,
 ];
 
 export {
@@ -25,4 +29,6 @@ export {
   todoTracker,
   changelogReminder,
   formatOnSave,
+  branchNaming,
+  lockfileConsistency,
 };

@@ -19,5 +19,6 @@ export const supabase: Preset = {
     },
     'security/env-exposure': true,
     'quality/no-console-log': true,
+    'security/sql-injection': true,
   },
 };

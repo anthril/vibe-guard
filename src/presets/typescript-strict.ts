@@ -17,5 +17,8 @@ export const typescriptStrict: Preset = {
     },
     'quality/no-console-log': true,
     'quality/max-file-length': true,
+    'quality/no-any-type': true,
+    'quality/error-handling': true,
+    'security/unsafe-eval': true,
   },
 };

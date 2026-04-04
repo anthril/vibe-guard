@@ -23,5 +23,7 @@ export const react19: Preset = {
     'quality/file-structure': {
       framework: 'react',
     },
+    'quality/a11y-jsx': true,
+    'security/xss-prevention': true,
   },
 };

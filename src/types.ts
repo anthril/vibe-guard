@@ -158,16 +158,28 @@ export interface MonorepoConfig {
   overrides?: Record<string, Partial<Pick<VGuardConfig, 'presets' | 'rules'>>>;
 }
 
+/** Real-time streaming configuration */
+export interface StreamingConfig {
+  /** Minimum events buffered before flushing (default: 10) */
+  batchSize?: number;
+  /** Maximum time between flushes in ms (default: 5000) */
+  flushIntervalMs?: number;
+  /** HTTP timeout for stream requests in ms (default: 2000) */
+  timeoutMs?: number;
+}
+
 /** Cloud sync settings */
 export interface CloudConfig {
   /** Enable Cloud sync */
   enabled?: boolean;
   /** Cloud project ID (set by `vguard cloud connect`) */
   projectId?: string;
-  /** Auto-sync on Stop hook (default: true) */
+  /** Auto-sync rule hits to Cloud (default: true). Enables both session-end batch sync and real-time streaming. */
   autoSync?: boolean;
   /** Glob patterns for file paths to exclude from sync */
   excludePaths?: string[];
+  /** Real-time streaming settings (fine-tune flush behavior) */
+  streaming?: StreamingConfig;
 }
 
 /** Resolved per-rule configuration after merging presets + user config + defaults */

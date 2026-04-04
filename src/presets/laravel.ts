@@ -7,5 +7,7 @@ export const laravel: Preset = {
   version: '1.0.0',
   rules: {
     'workflow/migration-safety': true,
+    'security/xss-prevention': true,
+    'security/sql-injection': true,
   },
 };

@@ -129,6 +129,9 @@ describe('initCommand', () => {
       })
       .mockResolvedValueOnce({
         folders: ['claude-code', 'github-actions'],
+      })
+      .mockResolvedValueOnce({
+        enableCloud: false,
       });
 
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});

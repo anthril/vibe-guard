@@ -21,5 +21,9 @@ export const nextjs15: Preset = {
     'quality/file-structure': true,
     'quality/no-console-log': true,
     'security/env-exposure': true,
+    'security/unsafe-eval': true,
+    'security/no-hardcoded-urls': true,
+    'quality/error-handling': true,
+    'quality/a11y-jsx': true,
   },
 };

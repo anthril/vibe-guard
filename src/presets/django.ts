@@ -11,5 +11,7 @@ export const django: Preset = {
       aliases: [],
       maxRelativeDepth: 3,
     },
+    'security/xss-prevention': true,
+    'security/sql-injection': true,
   },
 };

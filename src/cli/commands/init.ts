@@ -86,6 +86,53 @@ export async function initCommand(): Promise<void> {
 
   const selectedFolders = new Set(folderAnswers.folders as string[]);
 
+  // Cloud setup prompt
+  const cloudAnswers = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'enableCloud',
+      message: 'Enable VGuard Cloud? (real-time telemetry dashboard)',
+      default: false,
+    },
+  ]);
+
+  if (cloudAnswers.enableCloud) {
+    const cloudMethod = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'authMethod',
+        message: 'How would you like to connect?',
+        choices: [
+          { name: 'Login via browser (recommended)', value: 'browser' },
+          { name: 'I have an API key', value: 'key' },
+          { name: 'Skip for now (configure later with `vguard cloud connect`)', value: 'skip' },
+        ],
+      },
+    ]);
+
+    if (cloudMethod.authMethod === 'browser') {
+      try {
+        const { cloudLoginCommand } = await import('./cloud-login.js');
+        await cloudLoginCommand({});
+        const { cloudConnectCommand } = await import('./cloud-connect.js');
+        await cloudConnectCommand({});
+      } catch {
+        console.log('  Cloud setup skipped — you can run `vguard cloud connect` later.\n');
+      }
+    } else if (cloudMethod.authMethod === 'key') {
+      const keyAnswers = await inquirer.prompt([
+        { type: 'input', name: 'key', message: 'API Key (vc_...):' },
+        { type: 'input', name: 'projectId', message: 'Project ID:' },
+      ]);
+      try {
+        const { cloudConnectCommand } = await import('./cloud-connect.js');
+        await cloudConnectCommand({ key: keyAnswers.key, projectId: keyAnswers.projectId });
+      } catch {
+        console.log('  Cloud setup skipped — you can run `vguard cloud connect` later.\n');
+      }
+    }
+  }
+
   // Build config
   const protectedBranches = (answers.protectedBranches as string)
     .split(',')
@@ -100,6 +147,14 @@ export async function initCommand(): Promise<void> {
         protectedBranches,
       },
     },
+    ...(cloudAnswers.enableCloud
+      ? {
+          cloud: {
+            enabled: true,
+            autoSync: true,
+          },
+        }
+      : {}),
   };
 
   // Write config file
@@ -169,6 +224,9 @@ export default defineConfig(${JSON.stringify(config, null, 2)});
     for (const file of gaFiles) await writeGeneratedFile(file);
   }
 
+  // Offer to add convenience npm scripts
+  await injectNpmScripts(projectRoot);
+
   // Summary
   const ruleCount = resolvedConfig.rules.size;
   console.log(`\n  VGuard initialized with ${ruleCount} active rules.`);
@@ -213,6 +271,59 @@ function buildFolderChoices(selectedAgents: AgentType[]) {
   });
 
   return choices;
+}
+
+/**
+ * Offer to inject VGuard convenience scripts into the project's package.json.
+ * This allows running `npm run vguard:lint` instead of `npx vguard lint`.
+ */
+async function injectNpmScripts(projectRoot: string): Promise<void> {
+  const pkgPath = join(projectRoot, 'package.json');
+  if (!existsSync(pkgPath)) return;
+
+  const scriptAnswer = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'addScripts',
+      message: 'Add VGuard convenience scripts to package.json?',
+      default: true,
+    },
+  ]);
+
+  if (!scriptAnswer.addScripts) return;
+
+  try {
+    const raw = readFileSync(pkgPath, 'utf-8');
+    const pkg = JSON.parse(raw);
+    const existing = pkg.scripts ?? {};
+
+    const newScripts: Record<string, string> = {
+      vguard: 'vguard',
+      'vguard:lint': 'vguard lint',
+      'vguard:fix': 'vguard fix',
+      'vguard:doctor': 'vguard doctor',
+      'vguard:sync': 'vguard sync',
+      'vguard:report': 'vguard report',
+    };
+
+    let added = 0;
+    for (const [key, value] of Object.entries(newScripts)) {
+      if (!(key in existing)) {
+        existing[key] = value;
+        added++;
+      }
+    }
+
+    if (added > 0) {
+      pkg.scripts = existing;
+      await writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf-8');
+      console.log(`  Added ${added} VGuard scripts to package.json`);
+    } else {
+      console.log('  VGuard scripts already present in package.json');
+    }
+  } catch {
+    // Non-critical — skip silently
+  }
 }
 
 function detectFramework(projectRoot: string): string | null {

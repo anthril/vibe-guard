@@ -7,5 +7,6 @@ export const fastapi: Preset = {
   version: '1.0.0',
   rules: {
     'workflow/migration-safety': true,
+    'security/sql-injection': true,
   },
 };

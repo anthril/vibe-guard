@@ -15,3 +15,4 @@ export {
   applyExclusions,
   type SyncResult,
 } from './sync.js';
+export { maybeFlushToCloud } from './streamer.js';

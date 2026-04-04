@@ -6,6 +6,10 @@ import { promptInjection } from './prompt-injection.js';
 import { dependencyAudit } from './dependency-audit.js';
 import { envExposure } from './env-exposure.js';
 import { rlsRequired } from './rls-required.js';
+import { unsafeEval } from './unsafe-eval.js';
+import { noHardcodedUrls } from './no-hardcoded-urls.js';
+import { xssPrevention } from './xss-prevention.js';
+import { sqlInjection } from './sql-injection.js';
 
 export const securityRules: Rule[] = [
   branchProtection,
@@ -15,6 +19,10 @@ export const securityRules: Rule[] = [
   dependencyAudit,
   envExposure,
   rlsRequired,
+  unsafeEval,
+  noHardcodedUrls,
+  xssPrevention,
+  sqlInjection,
 ];
 
 export {
@@ -25,4 +33,8 @@ export {
   dependencyAudit,
   envExposure,
   rlsRequired,
+  unsafeEval,
+  noHardcodedUrls,
+  xssPrevention,
+  sqlInjection,
 };

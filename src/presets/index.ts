@@ -13,6 +13,10 @@ import { astro } from './astro.js';
 import { sveltekit } from './sveltekit.js';
 import { pythonStrict } from './python-strict.js';
 import { go } from './go.js';
+import { vue } from './vue.js';
+import { remix } from './remix.js';
+import { prisma } from './prisma.js';
+import { express } from './express.js';
 
 /** All built-in presets */
 export const allBuiltinPresets = [
@@ -30,6 +34,10 @@ export const allBuiltinPresets = [
   sveltekit,
   pythonStrict,
   go,
+  vue,
+  remix,
+  prisma,
+  express,
 ];
 
 /** Register all built-in presets */
@@ -57,4 +65,8 @@ export {
   sveltekit,
   pythonStrict,
   go,
+  vue,
+  remix,
+  prisma,
+  express,
 };

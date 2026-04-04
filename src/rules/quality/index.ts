@@ -10,6 +10,10 @@ import { testCoverage } from './test-coverage.js';
 import { maxFileLength } from './max-file-length.js';
 import { noConsoleLog } from './no-console-log.js';
 import { deadExports } from './dead-exports.js';
+import { noAnyType } from './no-any-type.js';
+import { errorHandling } from './error-handling.js';
+import { a11yJsx } from './a11y-jsx.js';
+import { magicNumbers } from './magic-numbers.js';
 
 export const qualityRules: Rule[] = [
   importAliases,
@@ -23,6 +27,10 @@ export const qualityRules: Rule[] = [
   maxFileLength,
   noConsoleLog,
   deadExports,
+  noAnyType,
+  errorHandling,
+  a11yJsx,
+  magicNumbers,
 ];
 
 export {
@@ -37,4 +45,8 @@ export {
   maxFileLength,
   noConsoleLog,
   deadExports,
+  noAnyType,
+  errorHandling,
+  a11yJsx,
+  magicNumbers,
 };

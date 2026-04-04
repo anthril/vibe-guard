@@ -59,28 +59,48 @@ export function recordRuleHit(
 }
 
 /**
+ * Parse JSONL content into RuleHitRecord array.
+ */
+function parseJsonlContent(content: string): RuleHitRecord[] {
+  return content
+    .trim()
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => {
+      try {
+        return JSON.parse(line) as RuleHitRecord;
+      } catch {
+        return null;
+      }
+    })
+    .filter((r): r is RuleHitRecord => r !== null);
+}
+
+/**
  * Read all rule hit records from the log file.
+ * Also reads the rotated `.old` file to prevent data loss
+ * for records written between the last sync and log rotation.
  */
 export function readRuleHits(projectRoot: string): RuleHitRecord[] {
   const logPath = join(projectRoot, LOG_FILENAME);
-
-  if (!existsSync(logPath)) return [];
+  const oldPath = logPath + '.old';
+  const records: RuleHitRecord[] = [];
 
   try {
-    const content = readFileSync(logPath, 'utf-8');
-    return content
-      .trim()
-      .split('\n')
-      .filter(Boolean)
-      .map((line) => {
-        try {
-          return JSON.parse(line) as RuleHitRecord;
-        } catch {
-          return null;
-        }
-      })
-      .filter((r): r is RuleHitRecord => r !== null);
+    // Read rotated file first (older records) to maintain chronological order
+    if (existsSync(oldPath)) {
+      const oldContent = readFileSync(oldPath, 'utf-8');
+      records.push(...parseJsonlContent(oldContent));
+    }
+
+    // Then read current file (newer records)
+    if (existsSync(logPath)) {
+      const content = readFileSync(logPath, 'utf-8');
+      records.push(...parseJsonlContent(content));
+    }
   } catch {
-    return [];
+    // Fail gracefully — return whatever we have
   }
+
+  return records;
 }

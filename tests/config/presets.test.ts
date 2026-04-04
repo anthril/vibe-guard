@@ -8,8 +8,8 @@ import '../../src/presets/index.js';
 describe('preset resolution', () => {
   const presetMap = getAllPresets();
 
-  it('should have 14 built-in presets', () => {
-    expect(presetMap.size).toBe(14);
+  it('should have 18 built-in presets', () => {
+    expect(presetMap.size).toBe(18);
     expect(presetMap.has('nextjs-15')).toBe(true);
     expect(presetMap.has('typescript-strict')).toBe(true);
     expect(presetMap.has('react-19')).toBe(true);
@@ -24,6 +24,10 @@ describe('preset resolution', () => {
     expect(presetMap.has('sveltekit')).toBe(true);
     expect(presetMap.has('python-strict')).toBe(true);
     expect(presetMap.has('go')).toBe(true);
+    expect(presetMap.has('vue')).toBe(true);
+    expect(presetMap.has('remix')).toBe(true);
+    expect(presetMap.has('prisma')).toBe(true);
+    expect(presetMap.has('express')).toBe(true);
   });
 
   it('nextjs-15 preset enables correct rules', () => {

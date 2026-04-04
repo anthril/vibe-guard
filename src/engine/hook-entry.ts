@@ -5,12 +5,13 @@
  * It reads stdin, builds context, resolves rules, runs them, and outputs results.
  */
 
-import type { HookEvent } from '../types.js';
+import type { HookEvent, CloudConfig } from '../types.js';
 import { parseStdinJson, extractToolInput } from '../utils/stdin.js';
 import { loadCompiledConfig } from '../config/compile.js';
 import { buildHookContext } from './context.js';
 import { resolveRules } from './resolver.js';
 import { runRules } from './runner.js';
+import { recordRuleHit } from './tracker.js';
 import { recordPerfEntry } from './perf.js';
 import { formatPreToolUseOutput, formatPostToolUseOutput, formatStopOutput } from './output.js';
 import { isValidHookEvent } from '../utils/validation.js';
@@ -66,6 +67,13 @@ export async function executeHook(event: HookEvent): Promise<void> {
     const result = await runRules(resolvedRules, context);
     const hookDuration = Date.now() - hookStart;
 
+    // 6b. Record rule hits for local analytics + cloud sync
+    const filePath =
+      (rawInput.tool_input as Record<string, unknown>)?.file_path as string | undefined;
+    for (const ruleResult of result.results) {
+      recordRuleHit(ruleResult, event, toolName, filePath, process.cwd());
+    }
+
     // Record perf data
     recordPerfEntry(process.cwd(), {
       event,
@@ -74,7 +82,12 @@ export async function executeHook(event: HookEvent): Promise<void> {
       ruleCount: resolvedRules.length,
     });
 
-    // 7. Auto-sync to cloud on Stop events (requires explicit opt-in)
+    // 7. Real-time streaming to cloud (every hook event if autoSync enabled)
+    if (config.cloud?.autoSync === true) {
+      triggerRealTimeStream(process.cwd(), config.cloud);
+    }
+
+    // 7b. Full flush on Stop events (catch any remaining buffered records)
     if (event === 'Stop' && config.cloud?.autoSync === true) {
       triggerCloudSync(process.cwd());
     }
@@ -98,6 +111,31 @@ export async function executeHook(event: HookEvent): Promise<void> {
     // Fail open — never block on internal errors
     process.exit(0);
   }
+}
+
+/**
+ * Attempt a real-time streaming flush if buffer thresholds are met.
+ * Non-blocking, fire-and-forget — errors are silently ignored.
+ */
+function triggerRealTimeStream(
+  projectRoot: string,
+  cloudConfig: NonNullable<CloudConfig>,
+): void {
+  import('../cloud/streamer.js')
+    .then(({ maybeFlushToCloud }) => {
+      const apiKey = process.env.VGUARD_API_KEY;
+      if (!apiKey) {
+        return import('../cloud/credentials.js').then(({ readCredentials }) => {
+          const key = readCredentials()?.apiKey;
+          if (!key) return;
+          return maybeFlushToCloud(projectRoot, key, cloudConfig);
+        });
+      }
+      return maybeFlushToCloud(projectRoot, apiKey, cloudConfig);
+    })
+    .catch(() => {
+      // Fail open — streaming errors should never impact the developer
+    });
 }
 
 /**

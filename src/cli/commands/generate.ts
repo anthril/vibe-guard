@@ -15,12 +15,18 @@ import { codexAdapter } from '../../adapters/codex/adapter.js';
 import { openCodeAdapter } from '../../adapters/opencode/adapter.js';
 import { githubActionsAdapter } from '../../adapters/github-actions/adapter.js';
 import { mergeSettings } from '../../adapters/claude-code/settings-merger.js';
+import { applyProjectIntegrations } from '../../utils/project-scripts.js';
+import { clearIgnoreMatcherCache } from '../../utils/ignore.js';
 import type { VGuardConfig, GeneratedFile } from '../../types.js';
 
 export async function generateCommand(): Promise<void> {
   const projectRoot = process.cwd();
 
   console.log('\n  VGuard — Regenerating hooks...\n');
+
+  // Drop the ignore-matcher cache so the next lint/hook run re-reads
+  // any edits the user made to .vguardignore.
+  clearIgnoreMatcherCache();
 
   // Load config
   const discovered = discoverConfigFile(projectRoot);
@@ -83,6 +89,10 @@ export async function generateCommand(): Promise<void> {
   // GitHub Actions is always generated if any agent is configured
   const gaFiles = await githubActionsAdapter.generate(resolvedConfig, projectRoot);
   for (const file of gaFiles) await writeGeneratedFile(file);
+
+  // Refresh project scripts (package.json) + COMMANDS.md reference so new
+  // VGuard commands propagate to existing projects on upgrade.
+  await applyProjectIntegrations(projectRoot, { interactive: false });
 
   const ruleCount = Array.from(resolvedConfig.rules.values()).filter((r) => r.enabled).length;
   console.log(`\n  Generated output for ${ruleCount} active rules.\n`);

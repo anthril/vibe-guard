@@ -7,6 +7,117 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-04-05
+
+### Added
+
+#### `.vguardignore` — project-wide file exclusion
+
+- **`.vguardignore` file support.** VGuard now reads a project-level
+  `.vguardignore` (gitignore syntax) that excludes files and folders
+  from every VGuard execution path — `vguard lint`, Claude Code
+  runtime hooks (PreToolUse / PostToolUse), and `vguard learn`. This
+  solves the common complaint that auto-generated UI libraries
+  (shadcn/ui) and frozen SQL migrations were surfacing false-positive
+  violations that had no clean project-wide opt-out.
+- **`vguard init` creates a starter `.vguardignore`** with active
+  defaults (generated-code globs, IDE/OS cruft) plus commented hints
+  for common opt-ins (`src/components/ui/`, `supabase/migrations/`,
+  `prisma/migrations/`, snapshot/fixture folders). Existing
+  `.vguardignore` files are never overwritten.
+- **New `vguard ignore` subcommand** for managing the file without
+  opening it: `vguard ignore list` prints active patterns grouped by
+  source (defaults vs file), `vguard ignore add <pattern>` / `remove
+<pattern>` edit the file safely (dedupes, preserves comments),
+  `vguard ignore check <path>` reports whether a path is ignored and
+  which pattern matched, and `vguard ignore init` standalone-creates
+  the file for projects that predate v1.7.0.
+- **`vguard doctor` new check** reports `.vguardignore` status and
+  active pattern count, and warns when legacy `learn.ignorePaths` or
+  `cloud.excludePaths` config fields are set (with guidance to move
+  them into `.vguardignore`).
+
+#### Session tracking
+
+- Session tracking: Claude Code's `session_id` hook payload is now
+  captured on every hook invocation and attached to every rule-hit
+  record. Previously `session_id` was silently discarded, which meant
+  every synced `rule_hits.session_id` on the cloud dashboard was null
+  and sessions could not be grouped, filtered, or drilled into.
+- New `SessionStart` and `SessionEnd` Claude Code hooks are generated
+  by the claude-code adapter. Both are always registered (regardless
+  of active rules) and run matcher-less. They write lifecycle markers
+  to `.vguard/data/session-events.jsonl` with branch, cli_version,
+  agent, and cwd metadata, then fire a best-effort flush to the new
+  cloud `/api/v1/sessions/events` endpoint.
+- New `session-tracker.ts` / `session-streamer.ts` modules maintain
+  an append-only JSONL log of session lifecycle events and stream
+  them to the cloud with cursor-based deduplication. Fail-open
+  throughout — session telemetry never blocks developer work.
+- `HookContext` now carries an optional `sessionId` field, so custom
+  rules can read the active session id if they need it (e.g. to
+  include it in messages or autofix metadata).
+
+#### CLI commands as project scripts
+
+- `vguard init` now exposes **every** VGuard CLI command as a
+  namespaced `vguard:*` script in the project's `package.json`.
+  Previously only six commands were injected (`lint`, `fix`, `doctor`,
+  `sync`, `report`, and the base `vguard` alias); now all 16 commands
+  are registered — including `vguard:generate`, `vguard:learn`,
+  `vguard:upgrade`, `vguard:eject`, `vguard:add`, `vguard:remove`,
+  and the four `vguard:cloud:*` subcommands. Users can run
+  `npm run vguard:<cmd>` for any command without having to remember
+  the full CLI surface.
+- `.vguard/COMMANDS.md` is now generated on `vguard init` and
+  refreshed on `vguard generate`. This is a universal reference file
+  that lists every CLI command grouped by category (Setup, Quality,
+  Analysis, Maintenance, Cloud) with its description, npm script
+  shortcut, and argument-passthrough hints. It also serves projects
+  that don't have a `package.json` ("the project's equivalent file"),
+  giving every project a single, local, discoverable index of every
+  VGuard command.
+- `vguard generate` now refreshes the `vguard:*` scripts list and
+  rewrites `.vguard/COMMANDS.md` as part of its normal flow. This
+  ensures that new commands added in future VGuard releases
+  automatically surface in existing projects the next time they
+  regenerate their hooks — no manual `package.json` edits required.
+
+### Changed
+
+- `vguard learn` now merges `.vguardignore` with its existing
+  `learn.ignorePaths` config field — they compose, so users don't
+  have to choose. Same pattern for `cloud.excludePaths` in the sync /
+  streamer privacy filter.
+- `vguard generate` now clears the ignore-matcher cache so edits to
+  `.vguardignore` propagate to the next hook / lint run without
+  needing to restart the process.
+- `RuleHitRecord` (the JSONL shape written to
+  `.vguard/data/rule-hits.jsonl`) now carries an optional `sessionId`
+  field. Existing records without `sessionId` remain valid.
+- `recordRuleHit()` gained an optional `sessionId` parameter. Call
+  sites inside the CLI pass the session id extracted from stdin;
+  the parameter is backward compatible for any external callers.
+- `vguard generate` refreshes `.claude/settings.json` to include the
+  new SessionStart/SessionEnd hook entries. Existing projects only
+  need to re-run `vguard generate` once to start forwarding session
+  lifecycle events.
+- The command registry has moved to `src/utils/command-registry.ts`
+  as a single source of truth shared by `init`, `generate`, and the
+  `COMMANDS.md` renderer. Additions to the CLI only need to be
+  registered in one place to appear across all surfaces.
+- Added `ignore@^7.0.5` as a runtime dependency. This is the same
+  ~8KB MIT package used by ESLint, Prettier, and stylelint for full
+  gitignore semantics (negation with `!`, directory suffixes, globs,
+  comments, nested patterns).
+
+### Deprecated
+
+- `learn.ignorePaths` and `cloud.excludePaths` config fields — both
+  still work unchanged but are bridged into the new `IgnoreMatcher`.
+  `vguard doctor` surfaces a deprecation hint when either is set.
+  Plan to remove in v2.0.
+
 ## [1.4.1] - 2026-04-05
 
 ### Fixed

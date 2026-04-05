@@ -17,6 +17,8 @@ import { codexAdapter } from '../../adapters/codex/adapter.js';
 import { openCodeAdapter } from '../../adapters/opencode/adapter.js';
 import { githubActionsAdapter } from '../../adapters/github-actions/adapter.js';
 import { mergeSettings } from '../../adapters/claude-code/settings-merger.js';
+import { applyProjectIntegrations } from '../../utils/project-scripts.js';
+import { DEFAULT_VGUARDIGNORE } from './init-templates/vguardignore.js';
 
 export async function initCommand(): Promise<void> {
   const projectRoot = process.cwd();
@@ -224,8 +226,17 @@ export default defineConfig(${JSON.stringify(config, null, 2)});
     for (const file of gaFiles) await writeGeneratedFile(file);
   }
 
-  // Offer to add convenience npm scripts
-  await injectNpmScripts(projectRoot);
+  // Write starter .vguardignore (create-only — don't overwrite existing).
+  const ignorePath = join(projectRoot, '.vguardignore');
+  if (!existsSync(ignorePath)) {
+    await writeFile(ignorePath, DEFAULT_VGUARDIGNORE, 'utf-8');
+    console.log('  Created .vguardignore');
+  } else {
+    console.log('  Skipped .vguardignore (already exists)');
+  }
+
+  // Write COMMANDS.md reference + offer to add convenience npm scripts
+  await applyProjectIntegrations(projectRoot, { interactive: true });
 
   // Summary
   const ruleCount = resolvedConfig.rules.size;
@@ -271,59 +282,6 @@ function buildFolderChoices(selectedAgents: AgentType[]) {
   });
 
   return choices;
-}
-
-/**
- * Offer to inject VGuard convenience scripts into the project's package.json.
- * This allows running `npm run vguard:lint` instead of `npx vguard lint`.
- */
-async function injectNpmScripts(projectRoot: string): Promise<void> {
-  const pkgPath = join(projectRoot, 'package.json');
-  if (!existsSync(pkgPath)) return;
-
-  const scriptAnswer = await inquirer.prompt([
-    {
-      type: 'confirm',
-      name: 'addScripts',
-      message: 'Add VGuard convenience scripts to package.json?',
-      default: true,
-    },
-  ]);
-
-  if (!scriptAnswer.addScripts) return;
-
-  try {
-    const raw = readFileSync(pkgPath, 'utf-8');
-    const pkg = JSON.parse(raw);
-    const existing = pkg.scripts ?? {};
-
-    const newScripts: Record<string, string> = {
-      vguard: 'vguard',
-      'vguard:lint': 'vguard lint',
-      'vguard:fix': 'vguard fix',
-      'vguard:doctor': 'vguard doctor',
-      'vguard:sync': 'vguard sync',
-      'vguard:report': 'vguard report',
-    };
-
-    let added = 0;
-    for (const [key, value] of Object.entries(newScripts)) {
-      if (!(key in existing)) {
-        existing[key] = value;
-        added++;
-      }
-    }
-
-    if (added > 0) {
-      pkg.scripts = existing;
-      await writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf-8');
-      console.log(`  Added ${added} VGuard scripts to package.json`);
-    } else {
-      console.log('  VGuard scripts already present in package.json');
-    }
-  } catch {
-    // Non-critical — skip silently
-  }
 }
 
 function detectFramework(projectRoot: string): string | null {

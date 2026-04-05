@@ -7,8 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-04-05
+
+### Added
+
+- Config-snapshot sync: the hook runner now pushes the resolved project
+  configuration + CLI version to VGuard Cloud whenever the resolved
+  config hash changes or 24h have passed since the last push. This
+  populates `projects.config_snapshot` and `projects.vguard_version`
+  in the cloud database, which in turn lights up the dashboard's
+  Active Presets, Quick Stats, Project Rules, Config Resolution
+  Pipeline, and version-badge widgets. Previously those widgets were
+  always empty because nothing in the CLI ever wrote to those columns.
+  Override the endpoint host via `VGUARD_FUNCTIONS_URL` for self-hosted
+  Supabase projects.
+- `vguard sync` command also pushes the config snapshot after a
+  successful rule-hits sync, as a manual fallback when hooks are
+  disabled or haven't run recently.
+
+### Changed
+
+- `.husky/pre-commit` now skips the CHANGELOG.md / version-bump checks
+  when a merge is in progress (detected via `.git/MERGE_HEAD`). Merge
+  commits consolidate existing history and don't introduce new entries,
+  so blocking them forced empty CHANGELOG edits that added no value.
+  Lint and type-check still run on every commit, including merges.
+
 ### Fixed
 
+- Cloud sync default URL now points to `https://vguard.dev` instead of the
+  non-resolving `https://api.vguard.dev` / `https://app.vguard.dev` subdomains.
+  Affected the streamer (`/api/v1/ingest`), CloudClient base URL, and the
+  `cloud login` / `cloud connect` browser URLs. Users can still override via
+  `VGUARD_CLOUD_URL`.
+- `vguard cloud connect --key <vc_...> --project-id <id>` now always writes
+  the API key + project ID to `~/.vguard/credentials.json`, even when the
+  user has not previously run `vguard cloud login`. Previously the
+  credentials file was only updated if it already existed, which meant
+  Claude Code hooks had no way to read the API key and silently skipped
+  real-time cloud streaming.
 - Prettier formatting applied to 6 new rule and test files
 
 ## [1.3.0] - 2026-04-04

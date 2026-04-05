@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **New `vguard ignore` subcommand** for managing the file without
   opening it: `vguard ignore list` prints active patterns grouped by
   source (defaults vs file), `vguard ignore add <pattern>` / `remove
-  <pattern>` edit the file safely (dedupes, preserves comments),
+<pattern>` edit the file safely (dedupes, preserves comments),
   `vguard ignore check <path>` reports whether a path is ignored and
   which pattern matched, and `vguard ignore init` standalone-creates
   the file for projects that predate v1.7.0.

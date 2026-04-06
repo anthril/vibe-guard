@@ -24,9 +24,10 @@ program
 program
   .command('init')
   .description('Interactive setup wizard — configure VGuard for your project')
-  .action(async () => {
+  .option('--force', 'Reconfigure from scratch, overwriting existing config')
+  .action(async (options: { force?: boolean }) => {
     const { initCommand } = await import('./commands/init.js');
-    await initCommand();
+    await initCommand(options);
   });
 
 program

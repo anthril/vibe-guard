@@ -27,7 +27,8 @@ const FUNCTION_PATTERNS = [
 export const maxFunctionParams: Rule = {
   id: 'maintainability/max-function-params',
   name: 'Max Function Params',
-  description: 'Warns when functions have more than a configurable number of parameters (default: 4).',
+  description:
+    'Warns when functions have more than a configurable number of parameters (default: 4).',
   severity: 'warn',
   events: ['PreToolUse'],
   match: { tools: ['Write'] },
@@ -46,7 +47,8 @@ export const maxFunctionParams: Rule = {
     if (isTestFile(filePath) || isGeneratedFile(filePath)) return { status: 'pass', ruleId };
 
     // Skip .d.ts files
-    if (filePath.endsWith('.d.ts') || filePath.endsWith('.d.mts')) return { status: 'pass', ruleId };
+    if (filePath.endsWith('.d.ts') || filePath.endsWith('.d.mts'))
+      return { status: 'pass', ruleId };
 
     const ruleConfig = context.projectConfig.rules.get(ruleId);
     const maxParams = (ruleConfig?.options?.maxParams as number) ?? 4;

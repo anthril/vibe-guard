@@ -7,8 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.2] - 2026-04-06
+
 ### Added
 
+- **cli/init --force** — reconfigure VGuard from scratch, overwriting an
+  existing `vguard.config.ts` instead of exiting early.
 - **ai-for-vibe-guard/** — 6 AI-readable SKILL.md files (setup-vguard,
   add-rules, configure-presets, cloud-connect, troubleshoot, custom-rules)
   that AI coding assistants can reference to install, configure, and debug

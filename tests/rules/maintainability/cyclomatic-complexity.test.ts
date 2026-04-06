@@ -58,7 +58,10 @@ describe('maintainability/cyclomatic-complexity', () => {
       presets: [],
       agents: ['claude-code'],
       rules: new Map([
-        ['maintainability/cyclomatic-complexity', { enabled: true, severity: 'warn', options: { maxComplexity: 2 } }],
+        [
+          'maintainability/cyclomatic-complexity',
+          { enabled: true, severity: 'warn', options: { maxComplexity: 2 } },
+        ],
       ]),
     };
     const ctx = createContext({
@@ -77,7 +80,10 @@ describe('maintainability/cyclomatic-complexity', () => {
       presets: [],
       agents: ['claude-code'],
       rules: new Map([
-        ['maintainability/cyclomatic-complexity', { enabled: true, severity: 'warn', options: { maxComplexity: 3 } }],
+        [
+          'maintainability/cyclomatic-complexity',
+          { enabled: true, severity: 'warn', options: { maxComplexity: 3 } },
+        ],
       ]),
     };
     const ctx = createContext({
@@ -137,7 +143,10 @@ describe('maintainability/cyclomatic-complexity', () => {
       presets: [],
       agents: ['claude-code'],
       rules: new Map([
-        ['maintainability/cyclomatic-complexity', { enabled: true, severity: 'warn', options: { maxComplexity: 2 } }],
+        [
+          'maintainability/cyclomatic-complexity',
+          { enabled: true, severity: 'warn', options: { maxComplexity: 2 } },
+        ],
       ]),
     };
     const ctx = createContext({

@@ -14,14 +14,14 @@ Or reference the local path if you have the repo cloned.
 
 ## Available Skills
 
-| Skill | Description |
-|-------|-------------|
-| [setup-vguard](skills/setup-vguard/SKILL.md) | Install and configure VGuard in any project |
-| [add-rules](skills/add-rules/SKILL.md) | Add or enable specific guardrail rules |
+| Skill                                                  | Description                                    |
+| ------------------------------------------------------ | ---------------------------------------------- |
+| [setup-vguard](skills/setup-vguard/SKILL.md)           | Install and configure VGuard in any project    |
+| [add-rules](skills/add-rules/SKILL.md)                 | Add or enable specific guardrail rules         |
 | [configure-presets](skills/configure-presets/SKILL.md) | Configure ecosystem presets for your framework |
-| [cloud-connect](skills/cloud-connect/SKILL.md) | Connect to VGuard Cloud for analytics |
-| [troubleshoot](skills/troubleshoot/SKILL.md) | Debug common VGuard issues |
-| [custom-rules](skills/custom-rules/SKILL.md) | Write project-specific custom guardrail rules |
+| [cloud-connect](skills/cloud-connect/SKILL.md)         | Connect to VGuard Cloud for analytics          |
+| [troubleshoot](skills/troubleshoot/SKILL.md)           | Debug common VGuard issues                     |
+| [custom-rules](skills/custom-rules/SKILL.md)           | Write project-specific custom guardrail rules  |
 
 ## What is VGuard?
 

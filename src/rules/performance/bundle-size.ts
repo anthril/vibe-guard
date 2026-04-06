@@ -12,7 +12,10 @@ const configSchema = z.object({
  * Format: [packageName, suggestion]
  */
 const DEFAULT_BLOCKED: [string, string][] = [
-  ['lodash', 'Use lodash-es or import specific methods: import { debounce } from "lodash/debounce"'],
+  [
+    'lodash',
+    'Use lodash-es or import specific methods: import { debounce } from "lodash/debounce"',
+  ],
   ['moment', 'Use date-fns, dayjs, or the native Intl/Temporal APIs'],
   ['rxjs', 'Import specific operators: import { map } from "rxjs/operators"'],
   ['underscore', 'Use lodash-es or native array methods'],
@@ -28,7 +31,8 @@ const DEFAULT_BLOCKED: [string, string][] = [
 export const bundleSize: Rule = {
   id: 'performance/bundle-size',
   name: 'Bundle Size',
-  description: 'Warns when imports pull in large dependencies that should use tree-shakeable alternatives.',
+  description:
+    'Warns when imports pull in large dependencies that should use tree-shakeable alternatives.',
   severity: 'warn',
   events: ['PreToolUse'],
   match: { tools: ['Write'] },

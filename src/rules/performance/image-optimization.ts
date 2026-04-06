@@ -70,7 +70,7 @@ export const imageOptimization: Rule = {
         ? 'Use next/image: import Image from "next/image"'
         : framework === 'astro'
           ? 'Use astro:assets: import { Image } from "astro:assets"'
-          : 'Use your framework\'s optimized image component.';
+          : "Use your framework's optimized image component.";
 
     return {
       status: 'warn',

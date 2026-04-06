@@ -11,6 +11,7 @@ Create a project-specific guardrail rule that enforces custom coding standards v
 ## Required Information
 
 Gather from the user:
+
 - **Rule name**: kebab-case identifier (e.g., `no-hardcoded-api-urls`)
 - **Category**: `security`, `quality`, `workflow`, `testing`, `maintainability`, `performance`, or `reliability`
 - **Description**: What this rule prevents and why
@@ -45,9 +46,10 @@ export const myCustomRule: Rule = {
       const filePath = (toolInput as { file_path?: string })?.file_path ?? '';
 
       // Access the content being written
-      const content = (toolInput as { content?: string; new_string?: string })?.content
-        ?? (toolInput as { new_string?: string })?.new_string
-        ?? '';
+      const content =
+        (toolInput as { content?: string; new_string?: string })?.content ??
+        (toolInput as { new_string?: string })?.new_string ??
+        '';
 
       // Your custom check logic here
       // Return { status: 'block' | 'warn' | 'info' } with a message to flag a violation
@@ -73,13 +75,13 @@ export const myCustomRule: Rule = {
 
 The `check()` function receives a `HookContext` with:
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `event` | `'PreToolUse' \| 'PostToolUse' \| 'Stop'` | Which hook event triggered |
-| `tool` | `string` | The tool being used (Write, Edit, Bash, Read, etc.) |
-| `toolInput` | `Record<string, unknown>` | The tool's input parameters |
-| `projectConfig` | `ResolvedConfig` | The full resolved VGuard config |
-| `gitContext` | `{ branch, isDirty, stagedFiles }` | Git state information |
+| Property        | Type                                      | Description                                         |
+| --------------- | ----------------------------------------- | --------------------------------------------------- |
+| `event`         | `'PreToolUse' \| 'PostToolUse' \| 'Stop'` | Which hook event triggered                          |
+| `tool`          | `string`                                  | The tool being used (Write, Edit, Bash, Read, etc.) |
+| `toolInput`     | `Record<string, unknown>`                 | The tool's input parameters                         |
+| `projectConfig` | `ResolvedConfig`                          | The full resolved VGuard config                     |
+| `gitContext`    | `{ branch, isDirty, stagedFiles }`        | Git state information                               |
 
 ### Common toolInput shapes
 
@@ -123,23 +125,29 @@ function makeContext(overrides: Partial<HookContext>): HookContext {
 
 describe('my-custom-rule', () => {
   it('passes for valid content', () => {
-    const result = myCustomRule.check(makeContext({
-      toolInput: { file_path: 'src/app.ts', content: 'valid code' },
-    }));
+    const result = myCustomRule.check(
+      makeContext({
+        toolInput: { file_path: 'src/app.ts', content: 'valid code' },
+      }),
+    );
     expect(result.status).toBe('pass');
   });
 
   it('blocks forbidden pattern', () => {
-    const result = myCustomRule.check(makeContext({
-      toolInput: { file_path: 'src/app.ts', content: 'contains FORBIDDEN_PATTERN here' },
-    }));
+    const result = myCustomRule.check(
+      makeContext({
+        toolInput: { file_path: 'src/app.ts', content: 'contains FORBIDDEN_PATTERN here' },
+      }),
+    );
     expect(result.status).toBe('block');
   });
 
   it('fails open on error', () => {
-    const result = myCustomRule.check(makeContext({
-      toolInput: null as any,
-    }));
+    const result = myCustomRule.check(
+      makeContext({
+        toolInput: null as any,
+      }),
+    );
     expect(result.status).toBe('pass');
   });
 });

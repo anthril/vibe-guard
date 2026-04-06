@@ -25,6 +25,7 @@ npm install -D @solanticai/vguard
 ```
 
 For other package managers:
+
 - `yarn add -D @solanticai/vguard`
 - `pnpm add -D @solanticai/vguard`
 - `bun add -D @solanticai/vguard`
@@ -41,18 +42,18 @@ This creates `vguard.config.ts` with sensible defaults. Use `--force` to overwri
 
 Based on the detected framework, add the relevant presets to `vguard.config.ts`:
 
-| Framework | Preset(s) |
-|-----------|-----------|
-| Next.js | `nextjs-15`, `react-19`, `typescript-strict` |
-| React | `react-19`, `typescript-strict` |
-| Vue | `vue`, `typescript-strict` |
+| Framework        | Preset(s)                                    |
+| ---------------- | -------------------------------------------- |
+| Next.js          | `nextjs-15`, `react-19`, `typescript-strict` |
+| React            | `react-19`, `typescript-strict`              |
+| Vue              | `vue`, `typescript-strict`                   |
 | Svelte/SvelteKit | `svelte` or `sveltekit`, `typescript-strict` |
-| Astro | `astro`, `typescript-strict` |
-| Express | `express`, `typescript-strict` |
-| Django | `django` |
-| FastAPI | `fastapi` |
-| Laravel | `laravel` |
-| Rails | `rails` |
+| Astro            | `astro`, `typescript-strict`                 |
+| Express          | `express`, `typescript-strict`               |
+| Django           | `django`                                     |
+| FastAPI          | `fastapi`                                    |
+| Laravel          | `laravel`                                    |
+| Rails            | `rails`                                      |
 
 If using Tailwind CSS, also add `tailwind`. If using Supabase, add `supabase`.
 If using Prisma, add `prisma`.
@@ -75,6 +76,7 @@ npx vguard generate
 ```
 
 This generates hook files for the configured agent(s):
+
 - **Claude Code**: Creates entries in `.claude/settings.json` hooks
 - **Cursor**: Creates `.cursorrules` file
 - **Codex**: Creates `AGENTS.md` file

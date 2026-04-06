@@ -31,14 +31,17 @@ This checks: config validity, hook installation, Node.js version, package integr
 ## Step 3: Check Hook Installation
 
 For **Claude Code** (runtime enforcement):
+
 - Check `.claude/settings.json` for hook entries under `hooks.PreToolUse`, `hooks.PostToolUse`, etc.
 - If missing, run `npx vguard generate`
 
 For **Cursor** (advisory):
+
 - Check for `.cursorrules` or `.cursor/rules/` directory
 - If missing, run `npx vguard generate`
 
 For **Codex** (advisory):
+
 - Check for `AGENTS.md` in the project root
 - If missing, run `npx vguard generate`
 
@@ -68,13 +71,13 @@ npx vguard cloud status
 
 Common cloud issues:
 
-| Issue | Fix |
-|-------|-----|
-| "No API key found" | Run `npx vguard cloud connect <key>` |
-| "Sync failed (401)" | API key is invalid or revoked — get a new one from the dashboard |
-| "Sync failed (429)" | Rate limited — wait a moment and retry |
+| Issue                           | Fix                                                                                  |
+| ------------------------------- | ------------------------------------------------------------------------------------ |
+| "No API key found"              | Run `npx vguard cloud connect <key>`                                                 |
+| "Sync failed (401)"             | API key is invalid or revoked — get a new one from the dashboard                     |
+| "Sync failed (429)"             | Rate limited — wait a moment and retry                                               |
 | Data not appearing in dashboard | Check `.vguard/data/rule-hits.jsonl` has entries, then run `npx vguard sync --force` |
-| Stale data | Check `.vguard/data/sync-cursor.json` — delete it to force a full re-sync |
+| Stale data                      | Check `.vguard/data/sync-cursor.json` — delete it to force a full re-sync            |
 
 ## Step 7: Debug Rule Execution
 
@@ -84,6 +87,7 @@ npx vguard rules --verbose  # Show which preset enabled each rule
 ```
 
 If a rule isn't triggering:
+
 - Check the rule's `events` match the hook event (PreToolUse, PostToolUse, Stop)
 - Check the rule's `tools` match the tool being used (Edit, Write, Bash, etc.)
 - Check file patterns if the rule uses glob matching
@@ -101,9 +105,9 @@ npx vguard generate       # Regenerate all hook files
 
 ## Common Error Messages
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| `Cannot find module '@solanticai/vguard'` | Package not installed | Run `npm install -D @solanticai/vguard` |
-| `Config file not found` | Missing `vguard.config.ts` | Run `npx vguard init` |
-| `Hook script failed` | Compiled config corrupted | Run `npx vguard generate --force` |
-| `Permission denied` on credentials | File permissions issue | Check `~/.vguard/credentials.json` permissions |
+| Error                                     | Cause                      | Fix                                            |
+| ----------------------------------------- | -------------------------- | ---------------------------------------------- |
+| `Cannot find module '@solanticai/vguard'` | Package not installed      | Run `npm install -D @solanticai/vguard`        |
+| `Config file not found`                   | Missing `vguard.config.ts` | Run `npx vguard init`                          |
+| `Hook script failed`                      | Compiled config corrupted  | Run `npx vguard generate --force`              |
+| `Permission denied` on credentials        | File permissions issue     | Check `~/.vguard/credentials.json` permissions |

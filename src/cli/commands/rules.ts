@@ -150,7 +150,12 @@ export async function rulesDisableCommand(ruleId: string): Promise<void> {
 }
 
 function findConfigPath(projectRoot: string): string | null {
-  const candidates = ['vguard.config.ts', 'vguard.config.js', 'vguard.config.mjs', '.vguardrc.json'];
+  const candidates = [
+    'vguard.config.ts',
+    'vguard.config.js',
+    'vguard.config.mjs',
+    '.vguardrc.json',
+  ];
   for (const file of candidates) {
     const path = join(projectRoot, file);
     if (existsSync(path)) return path;

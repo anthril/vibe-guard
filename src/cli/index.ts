@@ -127,9 +127,7 @@ program
   });
 
 // Rules subcommands
-const rules = program
-  .command('rules')
-  .description('Manage rules (list, enable, disable)');
+const rules = program.command('rules').description('Manage rules (list, enable, disable)');
 
 rules
   .command('list')
@@ -158,9 +156,7 @@ rules
   });
 
 // Presets subcommands
-const presets = program
-  .command('presets')
-  .description('Manage presets (list, add, remove)');
+const presets = program.command('presets').description('Manage presets (list, add, remove)');
 
 presets
   .command('list')
@@ -188,9 +184,7 @@ presets
   });
 
 // Config subcommands
-const config = program
-  .command('config')
-  .description('View and modify VGuard configuration');
+const config = program.command('config').description('View and modify VGuard configuration');
 
 config
   .command('show')

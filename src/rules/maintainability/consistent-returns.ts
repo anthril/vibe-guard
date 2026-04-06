@@ -12,7 +12,8 @@ import { extractFunctions, isTestFile, isGeneratedFile } from '../../utils/code-
 export const consistentReturns: Rule = {
   id: 'maintainability/consistent-returns',
   name: 'Consistent Returns',
-  description: 'Warns when functions have inconsistent return types (mixed value and void returns).',
+  description:
+    'Warns when functions have inconsistent return types (mixed value and void returns).',
   severity: 'warn',
   events: ['PreToolUse'],
   match: { tools: ['Write'] },

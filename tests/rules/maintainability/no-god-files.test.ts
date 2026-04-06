@@ -87,7 +87,10 @@ describe('maintainability/no-god-files', () => {
       presets: [],
       agents: ['claude-code'],
       rules: new Map([
-        ['maintainability/no-god-files', { enabled: true, severity: 'warn', options: { maxExports: 3 } }],
+        [
+          'maintainability/no-god-files',
+          { enabled: true, severity: 'warn', options: { maxExports: 3 } },
+        ],
       ]),
     };
     const ctx = createContext({
@@ -115,7 +118,9 @@ describe('maintainability/no-god-files', () => {
   });
 
   it('should skip .d.ts files', () => {
-    const exports = Array.from({ length: 20 }, (_, i) => `export function fn${i}(): void;`).join('\n');
+    const exports = Array.from({ length: 20 }, (_, i) => `export function fn${i}(): void;`).join(
+      '\n',
+    );
     const ctx = createContext({
       toolInput: {
         file_path: '/project/src/types.d.ts',
@@ -131,7 +136,10 @@ describe('maintainability/no-god-files', () => {
       presets: [],
       agents: ['claude-code'],
       rules: new Map([
-        ['maintainability/no-god-files', { enabled: true, severity: 'warn', options: { maxExports: 5 } }],
+        [
+          'maintainability/no-god-files',
+          { enabled: true, severity: 'warn', options: { maxExports: 5 } },
+        ],
       ]),
     };
     const exports = Array.from({ length: 6 }, (_, i) => `export function fn${i}() {}`).join('\n');

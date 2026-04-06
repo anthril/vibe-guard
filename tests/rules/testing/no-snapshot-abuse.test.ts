@@ -122,7 +122,10 @@ describe('testing/no-snapshot-abuse', () => {
       presets: [],
       agents: ['claude-code'],
       rules: new Map([
-        ['testing/no-snapshot-abuse', { enabled: true, severity: 'warn', options: { maxSnapshots: 1 } }],
+        [
+          'testing/no-snapshot-abuse',
+          { enabled: true, severity: 'warn', options: { maxSnapshots: 1 } },
+        ],
       ]),
     };
     const ctx = createContext({

@@ -3,10 +3,7 @@ import { dirname } from 'node:path';
 import { aggregateReport } from '../../report/aggregator.js';
 import { generateMarkdownReport, saveReport } from '../../report/markdown.js';
 
-export async function reportCommand(options?: {
-  output?: string;
-  format?: string;
-}): Promise<void> {
+export async function reportCommand(options?: { output?: string; format?: string }): Promise<void> {
   const projectRoot = process.cwd();
 
   console.log('\n  VGuard Report — Generating quality dashboard...\n');

@@ -27,6 +27,7 @@ npx vguard cloud connect <your-api-key>
 This stores credentials securely in `~/.vguard/credentials.json` (mode 0600).
 
 If the API key is not provided as an argument, you can also set it via environment variable:
+
 ```bash
 export VGUARD_API_KEY=vc_your_api_key_here
 ```
@@ -52,13 +53,13 @@ export default defineConfig({
 
 ### Cloud Config Options
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `enabled` | `false` | Enable cloud connectivity |
-| `autoSync` | `true` | Auto-sync rule hits in real-time (when enabled) |
-| `excludePaths` | `[]` | Glob patterns for file paths to exclude from sync |
-| `streaming.batchSize` | `10` | Events buffered before flushing |
-| `streaming.flushIntervalMs` | `5000` | Max time between flushes (ms) |
+| Option                      | Default | Description                                       |
+| --------------------------- | ------- | ------------------------------------------------- |
+| `enabled`                   | `false` | Enable cloud connectivity                         |
+| `autoSync`                  | `true`  | Auto-sync rule hits in real-time (when enabled)   |
+| `excludePaths`              | `[]`    | Glob patterns for file paths to exclude from sync |
+| `streaming.batchSize`       | `10`    | Events buffered before flushing                   |
+| `streaming.flushIntervalMs` | `5000`  | Max time between flushes (ms)                     |
 
 ## Step 4: Regenerate Hooks
 

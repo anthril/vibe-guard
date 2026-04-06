@@ -10,24 +10,24 @@ Add or modify ecosystem presets in the VGuard configuration. Presets bundle rela
 
 ## Available Presets
 
-| Preset | Description | Key Rules Included |
-|--------|-------------|--------------------|
-| `nextjs-15` | Next.js 15 App Router | Server/client component boundaries, Route Handlers, metadata |
-| `react-19` | React 19 patterns | Hook rules, component naming, JSX best practices |
-| `typescript-strict` | Strict TypeScript | No `any`, explicit return types, strict null checks |
-| `vue` | Vue 3 Composition API | SFC structure, composables, reactivity |
-| `svelte` | Svelte 5 | Runes, component patterns |
-| `sveltekit` | SvelteKit | Load functions, form actions, routing |
-| `astro` | Astro | Island architecture, content collections |
-| `tailwind` | Tailwind CSS | Utility-first, no inline styles, class ordering |
-| `supabase` | Supabase | RLS policies, client usage, migrations |
-| `prisma` | Prisma ORM | Schema conventions, query optimization |
-| `express` | Express.js | Middleware patterns, error handling, security headers |
-| `django` | Django | Model conventions, view patterns, template security |
-| `fastapi` | FastAPI | Pydantic models, dependency injection, async patterns |
-| `laravel` | Laravel | Eloquent patterns, blade templates, migration conventions |
-| `rails` | Ruby on Rails | ActiveRecord, controller conventions |
-| `react-native` | React Native | Platform-specific code, navigation, performance |
+| Preset              | Description           | Key Rules Included                                           |
+| ------------------- | --------------------- | ------------------------------------------------------------ |
+| `nextjs-15`         | Next.js 15 App Router | Server/client component boundaries, Route Handlers, metadata |
+| `react-19`          | React 19 patterns     | Hook rules, component naming, JSX best practices             |
+| `typescript-strict` | Strict TypeScript     | No `any`, explicit return types, strict null checks          |
+| `vue`               | Vue 3 Composition API | SFC structure, composables, reactivity                       |
+| `svelte`            | Svelte 5              | Runes, component patterns                                    |
+| `sveltekit`         | SvelteKit             | Load functions, form actions, routing                        |
+| `astro`             | Astro                 | Island architecture, content collections                     |
+| `tailwind`          | Tailwind CSS          | Utility-first, no inline styles, class ordering              |
+| `supabase`          | Supabase              | RLS policies, client usage, migrations                       |
+| `prisma`            | Prisma ORM            | Schema conventions, query optimization                       |
+| `express`           | Express.js            | Middleware patterns, error handling, security headers        |
+| `django`            | Django                | Model conventions, view patterns, template security          |
+| `fastapi`           | FastAPI               | Pydantic models, dependency injection, async patterns        |
+| `laravel`           | Laravel               | Eloquent patterns, blade templates, migration conventions    |
+| `rails`             | Ruby on Rails         | ActiveRecord, controller conventions                         |
+| `react-native`      | React Native          | Platform-specific code, navigation, performance              |
 
 ## Step 1: Check Current Presets
 
@@ -41,7 +41,7 @@ Edit the `presets` array in `vguard.config.ts`:
 import { defineConfig } from '@solanticai/vguard';
 
 export default defineConfig({
-  presets: ['nextjs-15', 'typescript-strict', 'tailwind'],  // Add preset here
+  presets: ['nextjs-15', 'typescript-strict', 'tailwind'], // Add preset here
   agents: ['claude-code'],
 });
 ```
@@ -49,6 +49,7 @@ export default defineConfig({
 ### Preset Stacking
 
 Presets can be combined. Rules from all presets are merged:
+
 - If two presets define the same rule, the **last preset wins**
 - You can override any preset rule in the `rules` object
 

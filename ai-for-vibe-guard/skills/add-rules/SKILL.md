@@ -10,15 +10,15 @@ Enable or configure specific guardrail rules in the project's VGuard configurati
 
 ## Available Rule Categories
 
-| Category | Rules | Purpose |
-|----------|-------|---------|
-| **security** | secrets-in-code, sql-injection, command-injection, path-traversal, xss-prevention, branch-protection, env-file-protection | Prevent security vulnerabilities |
-| **quality** | import-aliases, naming-conventions, dead-exports, no-console-log, no-any-type, file-length, function-length, no-magic-numbers, consistent-error-handling, no-hardcoded-urls, barrel-exports | Enforce code quality standards |
-| **workflow** | commit-conventions, pr-reminder, branch-naming, changelog-update, test-before-commit, documentation-update, no-wip-commits | Maintain workflow discipline |
-| **testing** | test-coverage, mock-cleanup, snapshot-abuse, test-naming, no-skipped-tests | Ensure testing best practices |
-| **maintainability** | cyclomatic-complexity, max-nesting-depth, file-organization, dependency-management | Keep code maintainable |
-| **performance** | bundle-size, image-optimization, lazy-loading | Prevent performance regressions |
-| **reliability** | unhandled-promises | Improve runtime reliability |
+| Category            | Rules                                                                                                                                                                                       | Purpose                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| **security**        | secrets-in-code, sql-injection, command-injection, path-traversal, xss-prevention, branch-protection, env-file-protection                                                                   | Prevent security vulnerabilities |
+| **quality**         | import-aliases, naming-conventions, dead-exports, no-console-log, no-any-type, file-length, function-length, no-magic-numbers, consistent-error-handling, no-hardcoded-urls, barrel-exports | Enforce code quality standards   |
+| **workflow**        | commit-conventions, pr-reminder, branch-naming, changelog-update, test-before-commit, documentation-update, no-wip-commits                                                                  | Maintain workflow discipline     |
+| **testing**         | test-coverage, mock-cleanup, snapshot-abuse, test-naming, no-skipped-tests                                                                                                                  | Ensure testing best practices    |
+| **maintainability** | cyclomatic-complexity, max-nesting-depth, file-organization, dependency-management                                                                                                          | Keep code maintainable           |
+| **performance**     | bundle-size, image-optimization, lazy-loading                                                                                                                                               | Prevent performance regressions  |
+| **reliability**     | unhandled-promises                                                                                                                                                                          | Improve runtime reliability      |
 
 ## Step 1: Check Current Rules
 

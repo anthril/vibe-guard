@@ -59,7 +59,10 @@ export const assertionCount: Rule = {
     }
 
     if (emptyTests.length > 0) {
-      const names = emptyTests.slice(0, 3).map((n) => `"${n}"`).join(', ');
+      const names = emptyTests
+        .slice(0, 3)
+        .map((n) => `"${n}"`)
+        .join(', ');
       const suffix = emptyTests.length > 3 ? ` (and ${emptyTests.length - 3} more)` : '';
       return {
         status: 'warn',

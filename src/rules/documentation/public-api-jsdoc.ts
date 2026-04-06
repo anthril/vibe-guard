@@ -42,7 +42,8 @@ export const publicApiJsdoc: Rule = {
     if (filename.startsWith('index.')) return { status: 'pass', ruleId };
 
     // Skip .d.ts files
-    if (filePath.endsWith('.d.ts') || filePath.endsWith('.d.mts')) return { status: 'pass', ruleId };
+    if (filePath.endsWith('.d.ts') || filePath.endsWith('.d.mts'))
+      return { status: 'pass', ruleId };
 
     const ruleConfig = context.projectConfig.rules.get(ruleId);
     const requireForTypes = (ruleConfig?.options?.requireForTypes as boolean) ?? false;

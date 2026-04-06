@@ -24,9 +24,10 @@ program
 program
   .command('init')
   .description('Interactive setup wizard — configure VGuard for your project')
-  .action(async () => {
+  .option('--force', 'Reconfigure from scratch, overwriting existing config')
+  .action(async (options: { force?: boolean }) => {
     const { initCommand } = await import('./commands/init.js');
-    await initCommand();
+    await initCommand(options);
   });
 
 program
@@ -126,9 +127,7 @@ program
   });
 
 // Rules subcommands
-const rules = program
-  .command('rules')
-  .description('Manage rules (list, enable, disable)');
+const rules = program.command('rules').description('Manage rules (list, enable, disable)');
 
 rules
   .command('list')
@@ -157,9 +156,7 @@ rules
   });
 
 // Presets subcommands
-const presets = program
-  .command('presets')
-  .description('Manage presets (list, add, remove)');
+const presets = program.command('presets').description('Manage presets (list, add, remove)');
 
 presets
   .command('list')
@@ -187,9 +184,7 @@ presets
   });
 
 // Config subcommands
-const config = program
-  .command('config')
-  .description('View and modify VGuard configuration');
+const config = program.command('config').description('View and modify VGuard configuration');
 
 config
   .command('show')

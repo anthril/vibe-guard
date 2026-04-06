@@ -17,7 +17,8 @@ const configSchema = z.object({
 export const noGodFiles: Rule = {
   id: 'maintainability/no-god-files',
   name: 'No God Files',
-  description: 'Warns when a file has too many exports (default: 15), suggesting it should be split.',
+  description:
+    'Warns when a file has too many exports (default: 15), suggesting it should be split.',
   severity: 'warn',
   events: ['PreToolUse'],
   match: { tools: ['Write'] },
@@ -41,7 +42,8 @@ export const noGodFiles: Rule = {
     if (filename.startsWith('index.')) return { status: 'pass', ruleId };
 
     // Skip .d.ts files
-    if (filePath.endsWith('.d.ts') || filePath.endsWith('.d.mts')) return { status: 'pass', ruleId };
+    if (filePath.endsWith('.d.ts') || filePath.endsWith('.d.mts'))
+      return { status: 'pass', ruleId };
 
     const ruleConfig = context.projectConfig.rules.get(ruleId);
     const maxExports = (ruleConfig?.options?.maxExports as number) ?? 15;
@@ -49,7 +51,8 @@ export const noGodFiles: Rule = {
     let exportCount = 0;
 
     // Count named exports: export const|function|class|type|interface|enum
-    const namedExportPattern = /^export\s+(?:async\s+)?(?:const|function|class|type|interface|enum)\s+/gm;
+    const namedExportPattern =
+      /^export\s+(?:async\s+)?(?:const|function|class|type|interface|enum)\s+/gm;
     const namedMatches = content.match(namedExportPattern);
     if (namedMatches) exportCount += namedMatches.length;
 

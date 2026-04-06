@@ -92,7 +92,10 @@ describe('maintainability/max-function-params', () => {
       presets: [],
       agents: ['claude-code'],
       rules: new Map([
-        ['maintainability/max-function-params', { enabled: true, severity: 'warn', options: { maxParams: 2 } }],
+        [
+          'maintainability/max-function-params',
+          { enabled: true, severity: 'warn', options: { maxParams: 2 } },
+        ],
       ]),
     };
     const ctx = createContext({

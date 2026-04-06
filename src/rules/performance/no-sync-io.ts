@@ -62,7 +62,11 @@ export const noSyncIo: Rule = {
     // Skip config files by default
     if (allowInConfig) {
       const filename = normalized.split('/').pop() ?? '';
-      if (/^(vite|next|tailwind|postcss|jest|vitest|webpack|rollup|tsup|eslint|prettier)\.config\./.test(filename)) {
+      if (
+        /^(vite|next|tailwind|postcss|jest|vitest|webpack|rollup|tsup|eslint|prettier)\.config\./.test(
+          filename,
+        )
+      ) {
         return { status: 'pass', ruleId };
       }
     }

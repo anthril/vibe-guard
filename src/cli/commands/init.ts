@@ -20,19 +20,25 @@ import { mergeSettings } from '../../adapters/claude-code/settings-merger.js';
 import { applyProjectIntegrations } from '../../utils/project-scripts.js';
 import { DEFAULT_VGUARDIGNORE } from './init-templates/vguardignore.js';
 
-export async function initCommand(): Promise<void> {
+export async function initCommand(options?: { force?: boolean }): Promise<void> {
   const projectRoot = process.cwd();
 
   console.log('\n  VGuard — AI Coding Guardrails\n');
 
   // Check if already initialized
   if (
-    existsSync(join(projectRoot, 'vguard.config.ts')) ||
-    existsSync(join(projectRoot, '.vguardrc.json'))
+    !options?.force &&
+    (existsSync(join(projectRoot, 'vguard.config.ts')) ||
+      existsSync(join(projectRoot, '.vguardrc.json')))
   ) {
     console.log('  VGuard is already configured in this project.');
-    console.log('  Run `vguard generate` to regenerate hooks.\n');
+    console.log('  Run `vguard generate` to regenerate hooks.');
+    console.log('  Run `vguard init --force` to reconfigure from scratch.\n');
     return;
+  }
+
+  if (options?.force) {
+    console.log('  Reconfiguring VGuard (--force)\n');
   }
 
   // Detect framework

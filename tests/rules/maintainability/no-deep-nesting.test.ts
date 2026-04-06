@@ -69,7 +69,10 @@ describe('maintainability/no-deep-nesting', () => {
       presets: [],
       agents: ['claude-code'],
       rules: new Map([
-        ['maintainability/no-deep-nesting', { enabled: true, severity: 'warn', options: { maxDepth: 2 } }],
+        [
+          'maintainability/no-deep-nesting',
+          { enabled: true, severity: 'warn', options: { maxDepth: 2 } },
+        ],
       ]),
     };
     const ctx = createContext({

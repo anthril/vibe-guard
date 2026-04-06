@@ -55,7 +55,8 @@ export const mockCleanup: Rule = {
     return {
       status: 'warn',
       ruleId,
-      message: 'Mocks are used without cleanup. Missing afterEach with restoreAllMocks/resetAllMocks.',
+      message:
+        'Mocks are used without cleanup. Missing afterEach with restoreAllMocks/resetAllMocks.',
       fix: 'Add `afterEach(() => { vi.restoreAllMocks(); });` to clean up mocks between tests.',
     };
   },

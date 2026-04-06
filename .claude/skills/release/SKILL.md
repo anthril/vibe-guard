@@ -200,6 +200,43 @@ If checks fail:
 
 9. Report the discussion URL to the user.
 
+## Step 9: Audit vibe-guard-cloud Documentation
+
+After each release, check whether the cloud documentation needs updates:
+
+1. **Compare rule counts** — Get the total rule count and categories from vibe-guard source:
+   ```bash
+   cd C:/Development/vibe-guard
+   ls src/rules/*/index.ts | wc -l  # Count categories
+   grep -r "registerRule" src/rules/ | wc -l  # Count rules
+   ```
+
+2. **Check docs overview** — Read `C:/Development/vibe-guard-cloud/src/content/docs/rules/overview.md` and verify:
+   - Total rule count matches actual count
+   - All categories are listed
+   - No missing rule category pages
+
+3. **Check for missing doc pages** — Compare rule category directories against doc files:
+   ```bash
+   # Rule categories in source
+   ls C:/Development/vibe-guard/src/rules/
+   # Doc pages that exist
+   ls C:/Development/vibe-guard-cloud/src/content/docs/rules/
+   ```
+   If a category exists in source but has no matching doc page, create one following the format of existing pages.
+
+4. **Check sidebar navigation** — Verify `C:/Development/vibe-guard-cloud/src/app/(public)/docs/layout.tsx` lists all rule category pages in the `NAV_ORDER` Rules section.
+
+5. **Check CLI reference** — If new CLI commands were added, verify `C:/Development/vibe-guard-cloud/src/components/dashboard/CLIReferenceDialog.tsx` includes them.
+
+6. **Commit and push** any docs updates to vibe-guard-cloud:
+   ```bash
+   cd C:/Development/vibe-guard-cloud
+   git add src/content/docs/ src/app/ src/components/
+   git commit -m "docs: update for vX.Y.Z release"
+   git push origin master
+   ```
+
 ## Error Handling
 
 - **Never force-push** or modify master directly

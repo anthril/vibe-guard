@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-04-12
+
+### Fixed
+
+- **GitHub URLs** — corrected casing in all GitHub URLs from
+  `github.com/Anthril` to `github.com/anthril` to match the
+  canonical GitHub username. Affects README badges, sponsor links,
+  generated hook rule documentation, and release skill templates.
+
 ## [2.0.0] - 2026-04-12
 
 ### Changed

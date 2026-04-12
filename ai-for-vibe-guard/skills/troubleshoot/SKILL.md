@@ -107,7 +107,7 @@ npx vguard generate       # Regenerate all hook files
 
 | Error                                     | Cause                      | Fix                                            |
 | ----------------------------------------- | -------------------------- | ---------------------------------------------- |
-| `Cannot find module '@solanticai/vguard'` | Package not installed      | Run `npm install -D @solanticai/vguard`        |
+| `Cannot find module '@anthril/vguard'` | Package not installed      | Run `npm install -D @anthril/vguard`        |
 | `Config file not found`                   | Missing `vguard.config.ts` | Run `npx vguard init`                          |
 | `Hook script failed`                      | Compiled config corrupted  | Run `npx vguard generate --force`              |
 | `Permission denied` on credentials        | File permissions issue     | Check `~/.vguard/credentials.json` permissions |

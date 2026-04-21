@@ -10,12 +10,16 @@ import { discoverConfigFile, readRawConfig } from '../../config/discovery.js';
 import { resolveConfig } from '../../config/loader.js';
 import { getAllPresets } from '../../config/presets.js';
 import type { VGuardConfig } from '../../types.js';
+import { printBanner } from '../ui/banner.js';
+import { color } from '../ui/colors.js';
+import { glyph } from '../ui/glyphs.js';
+import { error, info } from '../ui/log.js';
+import { EXIT } from '../exit-codes.js';
 
 export async function rulesListCommand(options: { all?: boolean; json?: boolean }): Promise<void> {
   const projectRoot = process.cwd();
   const allRules = getAllRules();
 
-  // Try to load config to determine which rules are enabled
   const discovered = discoverConfigFile(projectRoot);
   let enabledRuleIds = new Set<string>();
 
@@ -26,7 +30,7 @@ export async function rulesListCommand(options: { all?: boolean; json?: boolean 
       const resolved = resolveConfig(rawConfig, presetMap);
       enabledRuleIds = new Set(
         Array.from(resolved.rules.entries())
-          .filter(([, config]) => config.enabled)
+          .filter(([, cfg]) => cfg.enabled)
           .map(([id]) => id),
       );
     } catch {
@@ -46,21 +50,22 @@ export async function rulesListCommand(options: { all?: boolean; json?: boolean 
     .sort((a, b) => a.id.localeCompare(b.id));
 
   if (options.json) {
-    console.log(JSON.stringify(rules, null, 2));
+    process.stdout.write(JSON.stringify(rules, null, 2) + '\n');
     return;
   }
 
   if (rules.length === 0) {
-    console.log('\n  No rules found.');
+    info('');
+    info('  No rules found.');
     if (!options.all) {
-      console.log('  Use --all to include disabled rules.\n');
+      info('  Use --all to include disabled rules.');
     }
+    info('');
     return;
   }
 
-  console.log('\n  VGuard Rules\n');
+  printBanner('Rules', `${rules.filter((r) => r.enabled).length} enabled / ${allRules.size} total`);
 
-  // Group by category
   const grouped = new Map<string, typeof rules>();
   for (const rule of rules) {
     const category = rule.id.split('/')[0];
@@ -69,22 +74,29 @@ export async function rulesListCommand(options: { all?: boolean; json?: boolean 
   }
 
   for (const [category, categoryRules] of grouped) {
-    console.log(`  ${category}/`);
+    info(`  ${color.bold(category + '/')}`);
     for (const rule of categoryRules) {
-      const status = rule.enabled ? '\u2713' : '\u2717';
-      const severityTag = rule.severity.toUpperCase().padEnd(5);
-      console.log(`    ${status} ${rule.id.padEnd(40)} ${severityTag}  ${rule.name}`);
+      const status = rule.enabled ? color.green(glyph('pass')) : color.dim(glyph('dot'));
+      const sev = rule.severity.toUpperCase().padEnd(5);
+      const sevColored =
+        rule.severity === 'block'
+          ? color.red(sev)
+          : rule.severity === 'warn'
+            ? color.yellow(sev)
+            : color.cyan(sev);
+      const line = `    ${status} ${rule.id.padEnd(40)} ${sevColored}  ${rule.name}`;
+      info(rule.enabled ? line : color.dim(line));
     }
-    console.log();
+    info('');
   }
 
   const enabled = rules.filter((r) => r.enabled).length;
   const total = allRules.size;
-  console.log(`  ${enabled}/${total} rules enabled.`);
+  info(`  ${enabled}/${total} rules enabled.`);
   if (!options.all && total > enabled) {
-    console.log('  Use --all to include disabled rules.');
+    info('  Use --all to include disabled rules.');
   }
-  console.log();
+  info('');
 }
 
 export async function rulesEnableCommand(ruleId: string): Promise<void> {
@@ -92,15 +104,15 @@ export async function rulesEnableCommand(ruleId: string): Promise<void> {
   const allRules = getAllRules();
 
   if (!allRules.has(ruleId)) {
-    console.error(`  Unknown rule: "${ruleId}".`);
+    error(`Unknown rule "${ruleId}".`);
     console.error('  Run `vguard rules list --all` to see available rules.');
-    process.exit(1);
+    process.exit(EXIT.USAGE);
   }
 
   const configPath = findConfigPath(projectRoot);
   if (!configPath) {
-    console.error('  No VGuard config found. Run `vguard init` first.');
-    process.exit(1);
+    error('No VGuard config found. Run `vguard init` first.');
+    process.exit(EXIT.NO_INPUT);
   }
 
   if (configPath.endsWith('.json')) {
@@ -109,12 +121,12 @@ export async function rulesEnableCommand(ruleId: string): Promise<void> {
     config.rules = config.rules ?? {};
     config.rules[ruleId] = true;
     await writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
-    console.log(`  Enabled rule: ${ruleId}`);
-    console.log('  Run `vguard generate` to update hooks.\n');
+    info(`  ${color.green(glyph('pass'))} Enabled rule: ${color.bold(ruleId)}`);
+    info('  Run `vguard generate` to update hooks.\n');
   } else {
-    console.log(`\n  Add the following to your vguard.config.ts:\n`);
-    console.log(`    rules: { '${ruleId}': true },`);
-    console.log(`\n  Then run \`vguard generate\` to update hooks.\n`);
+    info(`\n  Add the following to your vguard.config.ts:\n`);
+    info(`    rules: { '${ruleId}': true },`);
+    info(`\n  Then run \`vguard generate\` to update hooks.\n`);
   }
 }
 
@@ -123,15 +135,15 @@ export async function rulesDisableCommand(ruleId: string): Promise<void> {
   const allRules = getAllRules();
 
   if (!allRules.has(ruleId)) {
-    console.error(`  Unknown rule: "${ruleId}".`);
+    error(`Unknown rule "${ruleId}".`);
     console.error('  Run `vguard rules list --all` to see available rules.');
-    process.exit(1);
+    process.exit(EXIT.USAGE);
   }
 
   const configPath = findConfigPath(projectRoot);
   if (!configPath) {
-    console.error('  No VGuard config found. Run `vguard init` first.');
-    process.exit(1);
+    error('No VGuard config found. Run `vguard init` first.');
+    process.exit(EXIT.NO_INPUT);
   }
 
   if (configPath.endsWith('.json')) {
@@ -140,12 +152,12 @@ export async function rulesDisableCommand(ruleId: string): Promise<void> {
     config.rules = config.rules ?? {};
     config.rules[ruleId] = false;
     await writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
-    console.log(`  Disabled rule: ${ruleId}`);
-    console.log('  Run `vguard generate` to update hooks.\n');
+    info(`  ${color.yellow(glyph('dot'))} Disabled rule: ${color.bold(ruleId)}`);
+    info('  Run `vguard generate` to update hooks.\n');
   } else {
-    console.log(`\n  Add the following to your vguard.config.ts:\n`);
-    console.log(`    rules: { '${ruleId}': false },`);
-    console.log(`\n  Then run \`vguard generate\` to update hooks.\n`);
+    info(`\n  Add the following to your vguard.config.ts:\n`);
+    info(`    rules: { '${ruleId}': false },`);
+    info(`\n  Then run \`vguard generate\` to update hooks.\n`);
   }
 }
 

@@ -14,10 +14,12 @@ vi.mock('../../src/rules/index.js', () => ({}));
 
 vi.mock('../../src/engine/registry.js', () => ({
   hasRule: vi.fn(),
+  getAllRules: vi.fn(() => new Map()),
 }));
 
 vi.mock('../../src/config/presets.js', () => ({
   hasPreset: vi.fn(),
+  getAllPresets: vi.fn(() => new Map()),
 }));
 
 import { existsSync } from 'node:fs';
@@ -25,6 +27,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { hasRule } from '../../src/engine/registry.js';
 import { hasPreset } from '../../src/config/presets.js';
 import { addCommand } from '../../src/cli/commands/add.js';
+import { removeCommand } from '../../src/cli/commands/remove.js';
 
 describe('addCommand', () => {
   let exitSpy: ReturnType<typeof vi.spyOn>;
@@ -108,5 +111,28 @@ describe('addCommand', () => {
 
     await expect(addCommand('preset:nonexistent')).rejects.toThrow('process.exit');
     expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Unknown preset'));
+  });
+
+  // Regression: issue #34 — running `vguard add` without an id should
+  // emit a structured, discoverable message and exit 2 (USAGE), not a
+  // terse commander "missing required argument".
+  it('prints a helpful message and exits 2 when id is missing', async () => {
+    await expect(addCommand()).rejects.toThrow('process.exit');
+
+    const errorOutput = errorSpy.mock.calls.map((c) => String(c[0] ?? '')).join('\n');
+    expect(errorOutput).toContain('Missing rule or preset id');
+    expect(errorOutput).toContain('vguard add <id>');
+    expect(errorOutput).toContain('vguard rules list --all');
+    expect(errorOutput).toContain('vguard presets list');
+    expect(exitSpy).toHaveBeenCalledWith(2);
+  });
+
+  it('removeCommand also prints a helpful message when id is missing', async () => {
+    await expect(removeCommand()).rejects.toThrow('process.exit');
+
+    const errorOutput = errorSpy.mock.calls.map((c) => String(c[0] ?? '')).join('\n');
+    expect(errorOutput).toContain('Missing rule or preset id');
+    expect(errorOutput).toContain('vguard remove <id>');
+    expect(exitSpy).toHaveBeenCalledWith(2);
   });
 });

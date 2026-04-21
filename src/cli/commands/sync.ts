@@ -1,58 +1,66 @@
 import { syncToCloud } from '../../cloud/sync.js';
 import { readCredentials } from '../../cloud/credentials.js';
 import { maybePushConfigSnapshot } from '../../cloud/config-pusher.js';
+import { startSpinner } from '../ui/spinner.js';
+import { printBanner } from '../ui/banner.js';
+import { color } from '../ui/colors.js';
+import { glyph } from '../ui/glyphs.js';
+import { error, info } from '../ui/log.js';
+import { EXIT } from '../exit-codes.js';
 
 /**
  * `vguard sync`
- *
- * Uploads rule-hits.jsonl data to VGuard Cloud since last sync.
  */
 export async function syncCommand(
   options: { force?: boolean; dryRun?: boolean } = {},
 ): Promise<void> {
   const projectRoot = process.cwd();
 
-  console.log('\n  VGuard Cloud — Sync\n');
+  printBanner('Cloud Sync', 'Uploading rule-hits data');
 
-  // Get API key from environment or stored credentials
   const apiKey = process.env.VGUARD_API_KEY ?? readCredentials()?.apiKey;
   if (!apiKey) {
-    console.error('  No API key found.');
-    console.error('  Run `npx vguard cloud connect` to register this project.\n');
-    process.exit(1);
+    error('No API key found.');
+    console.error(color.dim('  Run `npx vguard cloud connect` to register this project.'));
+    process.exit(EXIT.NO_PERM);
   }
 
   if (options.dryRun) {
-    console.log('  Dry run — no data will be uploaded.\n');
+    info(color.dim('  Dry run - no data will be uploaded.\n'));
   }
 
+  const spinner = startSpinner(options.dryRun ? 'Computing sync preview' : 'Uploading to Cloud');
   const result = await syncToCloud(projectRoot, apiKey, {
     force: options.force,
     dryRun: options.dryRun,
   });
+  spinner.stop();
 
   if (result.error) {
-    console.error(`  Sync failed: ${result.error}\n`);
+    error(`Sync failed: ${result.error}`);
     // Fail-open: exit 0 so it doesn't block the developer
     return;
   }
 
   if (options.dryRun) {
-    console.log(`  Would sync ${result.skipped} records.\n`);
+    info(
+      `  ${color.cyan(glyph('info'))} Would sync ${color.bold(String(result.skipped))} records.\n`,
+    );
     return;
   }
 
   if (result.synced > 0) {
-    console.log(`  Synced ${result.synced} records to Cloud.`);
+    info(
+      `  ${color.green(glyph('pass'))} Synced ${color.bold(String(result.synced))} records to Cloud.`,
+    );
   } else {
-    console.log('  No new records to sync.');
+    info(`  ${color.dim(glyph('dot'))} No new records to sync.`);
   }
 
-  // Also push the resolved config snapshot (no-op if unchanged + recent)
   const configPush = await maybePushConfigSnapshot(projectRoot, apiKey);
   if (configPush.pushed) {
-    console.log('  Pushed project config snapshot to Cloud.\n');
+    info(`  ${color.green(glyph('pass'))} Pushed project config snapshot to Cloud.\n`);
   } else {
-    console.log('');
+    info('');
   }
 }

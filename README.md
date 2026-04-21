@@ -70,6 +70,35 @@ nextjs-15 · react-19 · typescript-strict · supabase · tailwind · django · 
 | [Custom Rules](https://vguard.dev/docs/guides/custom-rules) | Write your own guardrails                     |
 | [Troubleshooting](https://vguard.dev/docs/troubleshooting)  | Common issues and fixes                       |
 
+## Exit codes
+
+VGuard follows the BSD `sysexits.h` conventions so CI scripts can branch on specific failure modes. The mapping is stable across the major version and lives in [`src/cli/exit-codes.ts`](src/cli/exit-codes.ts).
+
+| Code  | Name            | When                                                                                          |
+| ----- | --------------- | --------------------------------------------------------------------------------------------- |
+| `0`   | `OK`            | Success.                                                                                      |
+| `1`   | `LINT_BLOCKING` | `vguard lint` found one or more `block`-severity issues.                                      |
+| `2`   | `USAGE`         | Unknown flag, missing required argument, invalid `--format` choice, `--check` + `--apply`.    |
+| `65`  | `DATA_ERR`      | Config file loaded but failed validation (malformed JSON / zod parse error).                  |
+| `66`  | `NO_INPUT`      | Expected config not found (e.g. any command needing `vguard.config.ts` before `vguard init`). |
+| `69`  | `UNAVAILABLE`   | Cloud API or network dependency unreachable.                                                  |
+| `70`  | `SOFTWARE`      | Unexpected internal error. `--debug` reveals the stack trace.                                 |
+| `77`  | `NO_PERM`       | Not logged in, 401/403 from Cloud, missing API key.                                           |
+| `78`  | `CONFIG`        | `vguard doctor` ran all checks and at least one failed (or warned with `--strict`).           |
+| `130` | `SIGINT`        | Ctrl+C — interactive prompts and long-running commands both honour this.                      |
+
+Example CI gate:
+
+```bash
+vguard doctor --strict
+case $? in
+  0)  echo "healthy" ;;
+  66) echo "run 'vguard init' first" ;;
+  78) echo "config or hooks broken - blocking deploy"; exit 1 ;;
+  *)  exit 1 ;;
+esac
+```
+
 ## VGuard Cloud
 
 [VGuard Cloud](https://vguard.dev) gives your team a dashboard for AI coding activity — which rules fire most, who's triggering blocks, and how conventions drift over time. Set up drift alerts, connect webhooks, and export analytics. Free tier available for small teams.

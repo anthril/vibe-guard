@@ -5,36 +5,45 @@ import { existsSync } from 'node:fs';
 import '../../presets/index.js';
 import '../../rules/index.js';
 
-import { hasRule } from '../../engine/registry.js';
-import { hasPreset } from '../../config/presets.js';
+import { getAllRules, hasRule } from '../../engine/registry.js';
+import { getAllPresets, hasPreset } from '../../config/presets.js';
+import { printBanner } from '../ui/banner.js';
+import { color } from '../ui/colors.js';
+import { glyph } from '../ui/glyphs.js';
+import { error, info } from '../ui/log.js';
+import { EXIT } from '../exit-codes.js';
 
-export async function addCommand(id: string): Promise<void> {
+export async function addCommand(id?: string): Promise<void> {
+  if (!id) {
+    emitMissingIdHelp('add');
+    process.exit(EXIT.USAGE);
+  }
+
   const projectRoot = process.cwd();
   const configPath = findConfigPath(projectRoot);
 
+  printBanner('Add', id);
+
   if (!configPath) {
-    console.error('  No VGuard config found. Run `vguard init` first.');
-    process.exit(1);
+    error('No VGuard config found. Run `vguard init` first.');
+    process.exit(EXIT.NO_INPUT);
   }
 
-  // Determine if it's a preset or rule
   const isPreset = id.startsWith('preset:');
   const actualId = isPreset ? id.replace('preset:', '') : id;
 
   if (isPreset) {
     if (!hasPreset(actualId)) {
-      console.error(`  Unknown preset: "${actualId}". Available presets:`);
-      // List available presets would go here
-      process.exit(1);
+      error(`Unknown preset "${actualId}".`);
+      console.error(color.dim('  Run `vguard presets list` to see available presets.'));
+      process.exit(EXIT.USAGE);
     }
-  } else {
-    if (!hasRule(actualId)) {
-      console.error(`  Unknown rule: "${actualId}".`);
-      process.exit(1);
-    }
+  } else if (!hasRule(actualId)) {
+    error(`Unknown rule "${actualId}".`);
+    console.error(color.dim('  Run `vguard rules list --all` to see available rules.'));
+    process.exit(EXIT.USAGE);
   }
 
-  // Read and modify config
   const raw = await readFile(configPath, 'utf-8');
 
   if (configPath.endsWith('.json')) {
@@ -50,19 +59,69 @@ export async function addCommand(id: string): Promise<void> {
     }
     await writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
   } else {
-    // For TypeScript configs, we append a comment with instructions
-    console.log(`\n  Add the following to your vguard.config.ts:\n`);
+    info(`\n  Add the following to your vguard.config.ts:\n`);
     if (isPreset) {
-      console.log(`    presets: [..., '${actualId}'],`);
+      info(color.cyan(`    presets: [..., '${actualId}'],`));
     } else {
-      console.log(`    rules: { ..., '${actualId}': true },`);
+      info(color.cyan(`    rules: { ..., '${actualId}': true },`));
     }
-    console.log(`\n  Then run \`vguard generate\` to update hooks.\n`);
+    info(`\n  Then run \`vguard generate\` to update hooks.\n`);
     return;
   }
 
-  console.log(`  Added ${isPreset ? 'preset' : 'rule'}: ${actualId}`);
-  console.log('  Run `vguard generate` to update hooks.\n');
+  info(
+    `  ${color.green(glyph('pass'))} Added ${isPreset ? 'preset' : 'rule'}: ${color.bold(actualId)}`,
+  );
+  info('  Run `vguard generate` to update hooks.\n');
+}
+
+/**
+ * Emits a structured, discoverable error when the user runs
+ * `vguard add` or `vguard remove` without an id. Surfaces real examples
+ * drawn from the current rule/preset registry so users wiring these
+ * commands into npm scripts don't hit a dead end.
+ */
+export function emitMissingIdHelp(action: 'add' | 'remove'): void {
+  const verb = action === 'add' ? 'Adding' : 'Removing';
+  const gerund = action === 'add' ? 'add' : 'remove';
+  const ruleSample = pickSample(Array.from(getAllRules().keys()), [
+    'security/branch-protection',
+    'security/destructive-commands',
+    'quality/anti-patterns',
+  ]);
+  const presetSample = pickSample(Array.from(getAllPresets().keys()), [
+    'nextjs-15',
+    'typescript-strict',
+    'react-19',
+  ]);
+
+  error(`Missing rule or preset id.`);
+  console.error('');
+  console.error(`  Usage:  ${color.bold(`vguard ${gerund} <id>`)}`);
+  console.error('');
+  console.error(`  ${verb} a rule:`);
+  if (ruleSample) console.error(color.cyan(`    vguard ${gerund} ${ruleSample}`));
+  console.error('');
+  console.error(`  ${verb} a preset:`);
+  if (presetSample) console.error(color.cyan(`    vguard ${gerund} preset:${presetSample}`));
+  console.error('');
+  console.error(color.dim('  Discover available ids:'));
+  console.error(
+    color.dim(
+      `    vguard rules list --all   ${glyph('arrow')} rule ids (e.g. quality/no-god-files)`,
+    ),
+  );
+  console.error(
+    color.dim(`    vguard presets list        ${glyph('arrow')} preset ids (e.g. nextjs-15)`),
+  );
+  console.error('');
+}
+
+function pickSample(available: string[], preferred: string[]): string | null {
+  for (const id of preferred) {
+    if (available.includes(id)) return id;
+  }
+  return available[0] ?? null;
 }
 
 function findConfigPath(projectRoot: string): string | null {

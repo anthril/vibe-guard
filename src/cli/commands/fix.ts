@@ -9,42 +9,38 @@ import { getAllPresets } from '../../config/presets.js';
 import { scanProject } from '../../engine/scanner.js';
 import type { VGuardConfig, HookContext } from '../../types.js';
 import { getAllRules } from '../../engine/registry.js';
+import { printBanner } from '../ui/banner.js';
+import { color } from '../ui/colors.js';
+import { glyph } from '../ui/glyphs.js';
+import { error, info } from '../ui/log.js';
+import { EXIT } from '../exit-codes.js';
 
-/**
- * `vguard fix`
- *
- * Scans the project and applies autofixes for rules that provide them.
- */
 export async function fixCommand(options: { dryRun?: boolean } = {}): Promise<void> {
   const projectRoot = process.cwd();
 
-  console.log('\n  VGuard Fix — Auto-fixing issues...\n');
+  printBanner('Fix', options.dryRun ? 'Preview autofixes (dry run)' : 'Auto-fixing issues');
 
-  // Load config
   const discovered = discoverConfigFile(projectRoot);
   if (!discovered) {
-    console.error('  No VGuard config found. Run `vguard init` first.');
-    process.exit(1);
+    error('No VGuard config found. Run `vguard init` first.');
+    process.exit(EXIT.NO_INPUT);
   }
 
   const rawConfig = await readRawConfig(discovered);
   const presetMap = getAllPresets();
   const config = resolveConfig(rawConfig as VGuardConfig, presetMap);
 
-  // Scan for issues
   const scanResult = await scanProject({ rootDir: projectRoot, config });
 
   if (scanResult.issues.length === 0) {
-    console.log('  No issues found.\n');
+    info(`  ${color.green('No issues found.')}\n`);
     return;
   }
 
-  // Collect autofixes by running rules again with full context
   const allRules = getAllRules();
   let fixesApplied = 0;
   let fixesAvailable = 0;
 
-  // Group issues by file for batch processing
   const issuesByFile = new Map<string, typeof scanResult.issues>();
   for (const issue of scanResult.issues) {
     const existing = issuesByFile.get(issue.filePath) ?? [];
@@ -57,7 +53,6 @@ export async function fixCommand(options: { dryRun?: boolean } = {}): Promise<vo
       const rule = allRules.get(issue.ruleId);
       if (!rule) continue;
 
-      // Re-run the rule to get the autofix
       let content: string;
       try {
         content = readFileSync(filePath, 'utf-8');
@@ -87,28 +82,36 @@ export async function fixCommand(options: { dryRun?: boolean } = {}): Promise<vo
           try {
             writeFileSync(filePath, result.autofix.newContent, 'utf-8');
             fixesApplied++;
-            console.log(`  Fixed: ${issue.ruleId} in ${filePath}`);
-            console.log(`         ${result.autofix.description}`);
+            info(
+              `  ${color.green(glyph('pass'))} Fixed ${color.dim(`[${issue.ruleId}]`)} in ${filePath}`,
+            );
+            info(color.dim(`      ${result.autofix.description}`));
           } catch (err) {
-            console.error(`  Failed to apply fix to ${filePath}: ${err}`);
+            process.stderr.write(
+              `  ${color.red(glyph('fail'))} Failed to apply fix to ${filePath}: ${err}\n`,
+            );
           }
         } else {
-          console.log(`  Would fix: ${issue.ruleId} in ${filePath}`);
-          console.log(`             ${result.autofix.description}`);
+          info(
+            `  ${color.cyan(glyph('arrow'))} Would fix ${color.dim(`[${issue.ruleId}]`)} in ${filePath}`,
+          );
+          info(color.dim(`      ${result.autofix.description}`));
         }
       }
     }
   }
 
-  console.log('');
+  info('');
   if (options.dryRun) {
-    console.log(`  ${fixesAvailable} autofix${fixesAvailable !== 1 ? 'es' : ''} available.`);
-    console.log('  Run `vguard fix` without --dry-run to apply.\n');
+    info(
+      `  ${color.cyan(`${fixesAvailable}`)} autofix${fixesAvailable !== 1 ? 'es' : ''} available.`,
+    );
+    info('  Run `vguard fix` without --dry-run to apply.\n');
   } else if (fixesApplied > 0) {
-    console.log(`  Applied ${fixesApplied} autofix${fixesApplied !== 1 ? 'es' : ''}.\n`);
+    info(`  ${color.green(`Applied ${fixesApplied} autofix${fixesApplied !== 1 ? 'es' : ''}.`)}\n`);
   } else {
-    console.log(
-      `  ${scanResult.issues.length} issue${scanResult.issues.length !== 1 ? 's' : ''} found but no autofixes available.\n`,
+    info(
+      `  ${color.yellow(`${scanResult.issues.length} issue${scanResult.issues.length !== 1 ? 's' : ''} found`)} but no autofixes available.\n`,
     );
   }
 }

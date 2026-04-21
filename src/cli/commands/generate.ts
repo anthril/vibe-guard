@@ -18,11 +18,13 @@ import { mergeSettings } from '../../adapters/claude-code/settings-merger.js';
 import { applyProjectIntegrations } from '../../utils/project-scripts.js';
 import { clearIgnoreMatcherCache } from '../../utils/ignore.js';
 import type { VGuardConfig, GeneratedFile } from '../../types.js';
+import { startSpinner } from '../ui/spinner.js';
+import { printBanner } from '../ui/banner.js';
 
 export async function generateCommand(): Promise<void> {
   const projectRoot = process.cwd();
 
-  console.log('\n  VGuard — Regenerating hooks...\n');
+  printBanner('Generate', 'Regenerating hooks and agent configs');
 
   // Drop the ignore-matcher cache so the next lint/hook run re-reads
   // any edits the user made to .vguardignore.
@@ -31,17 +33,20 @@ export async function generateCommand(): Promise<void> {
   // Load config
   const discovered = discoverConfigFile(projectRoot);
   if (!discovered) {
-    console.error('  No VGuard config found. Run `vguard init` first.');
-    process.exit(1);
+    const { error } = await import('../ui/log.js');
+    const { EXIT } = await import('../exit-codes.js');
+    error('No VGuard config found. Run `vguard init` first.');
+    process.exit(EXIT.NO_INPUT);
   }
 
+  const spinner = startSpinner('Resolving config');
   const rawConfig = await readRawConfig(discovered);
   const presetMap = getAllPresets();
   const resolvedConfig = resolveConfig(rawConfig as VGuardConfig, presetMap);
 
-  // Compile config cache
+  spinner.update('Compiling config cache');
   await compileConfig(resolvedConfig, projectRoot);
-  console.log('  Updated .vguard/cache/resolved-config.json');
+  spinner.succeed('Updated .vguard/cache/resolved-config.json');
 
   // Generate for each agent
   const writeGeneratedFile = async (file: GeneratedFile) => {

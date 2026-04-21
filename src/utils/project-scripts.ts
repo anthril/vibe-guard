@@ -10,7 +10,7 @@
  *   `vguard init` (interactive) and `vguard generate` (silent refresh).
  */
 
-import inquirer from 'inquirer';
+import { confirm } from '@inquirer/prompts';
 import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
@@ -194,15 +194,10 @@ export async function applyProjectIntegrations(
   let shouldInject = true;
 
   if (options.interactive) {
-    const answer = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'addScripts',
-        message: 'Add VGuard command shortcuts to package.json?',
-        default: true,
-      },
-    ]);
-    shouldInject = Boolean(answer.addScripts);
+    shouldInject = await confirm({
+      message: 'Add VGuard command shortcuts to package.json?',
+      default: true,
+    });
   }
 
   if (!shouldInject) return;

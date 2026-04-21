@@ -2,6 +2,11 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { hasValidCredentials, readCredentials, writeCredentials } from '../../cloud/credentials.js';
 import { CloudClient } from '../../cloud/client.js';
+import { printBanner } from '../ui/banner.js';
+import { color } from '../ui/colors.js';
+import { glyph } from '../ui/glyphs.js';
+import { error, info } from '../ui/log.js';
+import { EXIT } from '../exit-codes.js';
 
 const CLOUD_URL = process.env.VGUARD_CLOUD_URL ?? 'https://vguard.dev';
 
@@ -16,7 +21,15 @@ export async function cloudConnectCommand(
 ): Promise<void> {
   const projectRoot = process.cwd();
 
-  console.log('\n  VGuard Cloud — Connect Repository\n');
+  printBanner('Cloud Connect', 'Register repository with VGuard Cloud');
+
+  // Validate partial --key / --project-id up front so we don't surprise the
+  // user with an auth step they didn't ask for.
+  if ((options.key && !options.projectId) || (!options.key && options.projectId)) {
+    error('--key and --project-id must be provided together.');
+    console.error(color.dim('  Example: vguard cloud connect --key vc_... --project-id abc-123'));
+    process.exit(EXIT.USAGE);
+  }
 
   let apiKey: string;
   let projectId: string;
@@ -26,15 +39,15 @@ export async function cloudConnectCommand(
     projectId = options.projectId;
   } else {
     if (!hasValidCredentials()) {
-      console.log('  Not logged in. You have two options:\n');
-      console.log('  Option A — Login via browser:');
-      console.log(`    1. Visit ${CLOUD_URL}/cli`);
-      console.log('    2. Copy the command and run it');
-      console.log('    3. Then run: npx vguard cloud connect\n');
-      console.log('  Option B — Use an existing API key:');
-      console.log('    npx vguard cloud connect --key <vc_key> --project-id <id>\n');
-      console.log('  Create a project at the dashboard to get your key and ID.\n');
-      process.exit(1);
+      info('  Not logged in. You have two options:\n');
+      info(`  ${color.bold('Option A')} - Login via browser:`);
+      info(`    1. Visit ${color.cyan(`${CLOUD_URL}/cli`)}`);
+      info('    2. Copy the command and run it');
+      info('    3. Then run: npx vguard cloud connect\n');
+      info(`  ${color.bold('Option B')} - Use an existing API key:`);
+      info(color.dim('    npx vguard cloud connect --key <vc_key> --project-id <id>\n'));
+      info('  Create a project at the dashboard to get your key and ID.\n');
+      process.exit(EXIT.NO_PERM);
     }
 
     const projectName = options.name ?? projectRoot.split(/[/\\]/).pop() ?? 'unnamed';
@@ -45,34 +58,29 @@ export async function cloudConnectCommand(
       apiKey = result.apiKey;
       projectId = result.projectId;
 
-      console.log(`  Project registered: ${projectName}`);
-      console.log(`  Project ID: ${projectId}`);
-      console.log(`  API Key: ${apiKey}\n`);
+      info(`  ${color.green(glyph('pass'))} Project registered: ${color.bold(projectName)}`);
+      info(`  Project ID: ${projectId}`);
+      info(`  API Key: ${color.dim(apiKey)}\n`);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
-      console.error(`  Failed to connect: ${message}\n`);
-      process.exit(1);
+      error(`Failed to connect: ${message}`);
+      process.exit(EXIT.UNAVAILABLE);
     }
   }
 
-  // Save API key and project ID to credentials.
-  // Always persist so Claude Code hooks can read them, even when the user
-  // connects via --key/--project-id without having run `cloud login` first.
   const creds = readCredentials();
   writeCredentials({ ...(creds ?? {}), apiKey, projectId });
-  console.log('  Saved API key to credentials.');
+  info(`  ${color.green(glyph('pass'))} Saved API key to credentials.`);
 
-  // Auto-update vguard.config.ts
   if (updateConfigFile(projectRoot, projectId)) {
-    console.log('  Updated vguard.config.ts with cloud settings.');
+    info(`  ${color.green(glyph('pass'))} Updated vguard.config.ts with cloud settings.`);
   }
 
-  // Also write to .env.local for Next.js / framework access
   if (updateEnvFile(projectRoot, apiKey)) {
-    console.log('  Saved API key to .env.local');
+    info(`  ${color.green(glyph('pass'))} Saved API key to .env.local`);
   }
 
-  console.log('\n  Cloud connected! Run `npx vguard generate` to rebuild hooks.\n');
+  info(`\n  ${color.green('Cloud connected!')} Run \`npx vguard generate\` to rebuild hooks.\n`);
 }
 
 function updateConfigFile(projectRoot: string, projectId: string): boolean {

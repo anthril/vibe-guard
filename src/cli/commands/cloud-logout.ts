@@ -1,18 +1,20 @@
 import { clearCredentials, hasValidCredentials } from '../../cloud/credentials.js';
+import { printBanner } from '../ui/banner.js';
+import { color } from '../ui/colors.js';
+import { glyph } from '../ui/glyphs.js';
+import { info } from '../ui/log.js';
 
 /**
  * `vguard cloud logout`
- *
- * Removes stored Cloud credentials.
  */
 export async function cloudLogoutCommand(): Promise<void> {
-  console.log('\n  VGuard Cloud — Logout\n');
+  printBanner('Cloud Logout');
 
   if (!hasValidCredentials()) {
-    console.log('  Not currently logged in.\n');
+    info(`  ${color.dim(glyph('dot'))} Not currently logged in.\n`);
     return;
   }
 
   clearCredentials();
-  console.log('  Credentials removed. You are now logged out.\n');
+  info(`  ${color.green(glyph('pass'))} Credentials removed. You are now logged out.\n`);
 }

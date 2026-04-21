@@ -2,6 +2,11 @@ import http from 'node:http';
 import crypto from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { readCredentials, writeCredentials, getCredentialsPath } from '../../cloud/credentials.js';
+import { printBanner } from '../ui/banner.js';
+import { color } from '../ui/colors.js';
+import { glyph } from '../ui/glyphs.js';
+import { error, info } from '../ui/log.js';
+import { EXIT } from '../exit-codes.js';
 
 const DEFAULT_CLOUD_URL = process.env.VGUARD_CLOUD_URL ?? 'https://vguard.dev';
 const DEFAULT_SUPABASE_URL =
@@ -26,7 +31,7 @@ export async function cloudLoginCommand(
     noInteractive?: boolean;
   } = {},
 ): Promise<void> {
-  console.log('\n  VGuard Cloud — Login\n');
+  printBanner('Cloud Login');
 
   // Manual token flow (CI/headless)
   if (options.token) {
@@ -40,9 +45,9 @@ export async function cloudLoginCommand(
   const clientId = DEFAULT_OAUTH_CLIENT_ID;
 
   if (options.noInteractive) {
-    console.log('  To authenticate, visit:');
-    console.log(`  ${cloudUrl}/cli\n`);
-    console.log('  Sign in, then copy the command shown on that page.\n');
+    info('  To authenticate, visit:');
+    info(`  ${color.cyan(`${cloudUrl}/cli`)}\n`);
+    info('  Sign in, then copy the command shown on that page.\n');
     return;
   }
 
@@ -71,19 +76,18 @@ export async function cloudLoginCommand(
       supabaseUrl,
     });
 
-    console.log(`  Credentials saved to ${getCredentialsPath()}`);
-    if (email) console.log(`  Logged in as ${email}`);
-    console.log(`  API URL: ${cloudUrl}`);
-    console.log('  Refresh token stored — sessions will auto-renew.');
-    console.log('\n  Next step: run `npx vguard cloud connect` to register this project.\n');
+    info(`  ${color.green(glyph('pass'))} Credentials saved to ${getCredentialsPath()}`);
+    if (email) info(`  Logged in as ${color.bold(email)}`);
+    info(`  API URL: ${cloudUrl}`);
+    info(color.dim('  Refresh token stored - sessions will auto-renew.'));
+    info('\n  Next step: run `npx vguard cloud connect` to register this project.\n');
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Login failed';
-    console.error(`  ${message}\n`);
+    error(message);
 
-    // Fall back to manual flow
-    console.log('  You can also authenticate manually:');
-    console.log(`  Visit ${cloudUrl}/cli and follow the instructions.\n`);
-    process.exit(1);
+    info('  You can also authenticate manually:');
+    info(`  Visit ${cloudUrl}/cli and follow the instructions.\n`);
+    process.exit(EXIT.NO_PERM);
   }
 }
 
@@ -114,15 +118,15 @@ function handleTokenLogin(options: {
     supabaseAnonKey: options.supabaseAnonKey,
   });
 
-  console.log(`  Credentials saved to ${getCredentialsPath()}`);
-  if (email) console.log(`  Logged in as ${email}`);
-  if (options.url) console.log(`  API URL: ${options.url}`);
+  info(`  ${color.green(glyph('pass'))} Credentials saved to ${getCredentialsPath()}`);
+  if (email) info(`  Logged in as ${color.bold(email)}`);
+  if (options.url) info(`  API URL: ${options.url}`);
   if (options.refreshToken) {
-    console.log('  Refresh token stored — sessions will auto-renew.');
+    info(color.dim('  Refresh token stored - sessions will auto-renew.'));
   } else {
-    console.log('  No refresh token — session will expire in ~1 hour.');
+    info(color.yellow('  No refresh token - session will expire in ~1 hour.'));
   }
-  console.log('\n  Next step: run `npx vguard cloud connect` to register this project.\n');
+  info('\n  Next step: run `npx vguard cloud connect` to register this project.\n');
 }
 
 /**
@@ -249,22 +253,22 @@ async function oauthPkceLogin(
       if (process.platform === 'win32') {
         execFile('rundll32', ['url.dll,FileProtocolHandler', openUrl], (err) => {
           if (err) {
-            console.log(`  Could not open browser. Visit this URL manually:`);
-            console.log(`  ${openUrl}\n`);
+            info(`  Could not open browser. Visit this URL manually:`);
+            info(`  ${openUrl}\n`);
           }
         });
       } else {
         const openCmd = process.platform === 'darwin' ? 'open' : 'xdg-open';
         execFile(openCmd, [openUrl], (err) => {
           if (err) {
-            console.log(`  Could not open browser. Visit this URL manually:`);
-            console.log(`  ${openUrl}\n`);
+            info(`  Could not open browser. Visit this URL manually:`);
+            info(`  ${openUrl}\n`);
           }
         });
       }
 
-      console.log('  Opening browser for authentication...');
-      console.log('  Waiting for approval...\n');
+      info('  Opening browser for authentication...');
+      info(color.dim('  Waiting for approval...\n'));
     });
 
     // Timeout after 5 minutes

@@ -21,17 +21,24 @@ export async function rulesListCommand(options: { all?: boolean; json?: boolean 
   const allRules = getAllRules();
 
   const discovered = discoverConfigFile(projectRoot);
-  let enabledRuleIds = new Set<string>();
+  // `resolved.rules` holds the final severity after preset + user merging.
+  // Use it as the source of truth so `rules list` matches `config show` and
+  // the adapter-generated enforcement docs. Falling back to the catalogue
+  // severity on config errors keeps the listing useful when the config is
+  // broken.
+  let resolvedRules: Map<string, { enabled: boolean; severity: 'block' | 'warn' | 'info' }> =
+    new Map();
 
   if (discovered) {
     try {
       const rawConfig = (await readRawConfig(discovered)) as VGuardConfig;
       const presetMap = getAllPresets();
       const resolved = resolveConfig(rawConfig, presetMap);
-      enabledRuleIds = new Set(
-        Array.from(resolved.rules.entries())
-          .filter(([, cfg]) => cfg.enabled)
-          .map(([id]) => id),
+      resolvedRules = new Map(
+        Array.from(resolved.rules.entries()).map(([id, cfg]) => [
+          id,
+          { enabled: cfg.enabled, severity: cfg.severity },
+        ]),
       );
     } catch {
       // Config errors are non-fatal for listing
@@ -39,13 +46,16 @@ export async function rulesListCommand(options: { all?: boolean; json?: boolean 
   }
 
   const rules = Array.from(allRules.entries())
-    .map(([id, rule]) => ({
-      id,
-      name: rule.name,
-      severity: rule.severity,
-      enabled: enabledRuleIds.has(id),
-      description: rule.description,
-    }))
+    .map(([id, rule]) => {
+      const res = resolvedRules.get(id);
+      return {
+        id,
+        name: rule.name,
+        severity: res?.severity ?? rule.severity,
+        enabled: res?.enabled ?? false,
+        description: rule.description,
+      };
+    })
     .filter((r) => options.all || r.enabled)
     .sort((a, b) => a.id.localeCompare(b.id));
 

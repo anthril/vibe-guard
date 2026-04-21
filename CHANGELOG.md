@@ -110,6 +110,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`vguard rules list` now reports the resolved severity for
+  config-overridden rules.** The command used to emit the catalogue
+  default (`rule.severity`) in both the human-readable table and the
+  `--json` output, silently contradicting `config show` and the
+  adapter-generated enforcement docs for any rule whose severity was
+  overridden in `vguard.config.ts`. CI scripts that grepped
+  `rules list --json` for blocking rules got wrong answers on any
+  preset + user override combination. Now the command threads every
+  rule through `resolved.rules` (the same source `config show` uses)
+  and falls back to the catalogue default only when the config is
+  unreadable. Fixes #45.
+
 - `rollingWindowSpend(root, 0)` and the underlying `readUsage` filter
   now use strict `>` instead of `>=` for the `sinceIso` cutoff, so a
   zero-width window returns zero records deterministically (fixes a

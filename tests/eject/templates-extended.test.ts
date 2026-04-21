@@ -68,6 +68,9 @@ describe('security templates', () => {
   it('dependencyAudit generates dependency check', () => {
     const code = security.dependencyAudit(makeCtx({ ruleId: 'security/dependency-audit' }));
     expect(code).toContain('dependency-audit');
+    expect(code).toContain('package.json');
+    expect(code).toContain('dependencies');
+    expect(code).toContain('version');
   });
 });
 

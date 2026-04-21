@@ -1,4 +1,4 @@
-import inquirer from 'inquirer';
+import { checkbox, confirm, input, select } from '@inquirer/prompts';
 import { writeFile, mkdir } from 'node:fs/promises';
 import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -19,25 +19,61 @@ import { githubActionsAdapter } from '../../adapters/github-actions/adapter.js';
 import { mergeSettings } from '../../adapters/claude-code/settings-merger.js';
 import { applyProjectIntegrations } from '../../utils/project-scripts.js';
 import { DEFAULT_VGUARDIGNORE } from './init-templates/vguardignore.js';
+import { printBanner } from '../ui/banner.js';
+import { color } from '../ui/colors.js';
+import { isInteractive } from '../ui/env.js';
 
-export async function initCommand(options?: { force?: boolean }): Promise<void> {
+const KNOWN_AGENTS: AgentType[] = ['claude-code', 'cursor', 'codex', 'opencode'];
+type FolderAgent = AgentType | 'github-actions';
+
+export interface InitOptions {
+  force?: boolean;
+  yes?: boolean;
+  preset?: string[];
+  agent?: string[];
+  protectedBranches?: string;
+  cloud?: boolean;
+}
+
+export async function initCommand(options: InitOptions = {}): Promise<void> {
   const projectRoot = process.cwd();
+  const nonInteractive = options.yes === true || !isInteractive();
 
-  console.log('\n  VGuard — AI Coding Guardrails\n');
+  printBanner('Init', 'AI coding guardrails setup');
 
-  // Check if already initialized
-  if (
-    !options?.force &&
-    (existsSync(join(projectRoot, 'vguard.config.ts')) ||
-      existsSync(join(projectRoot, '.vguardrc.json')))
-  ) {
+  const hasExistingConfig =
+    existsSync(join(projectRoot, 'vguard.config.ts')) ||
+    existsSync(join(projectRoot, '.vguardrc.json'));
+
+  if (hasExistingConfig && !options.force) {
     console.log('  VGuard is already configured in this project.');
     console.log('  Run `vguard generate` to regenerate hooks.');
     console.log('  Run `vguard init --force` to reconfigure from scratch.\n');
     return;
   }
 
-  if (options?.force) {
+  if (options.force && hasExistingConfig) {
+    console.log(color.yellow('  WARNING') + ': --force will overwrite the existing VGuard config');
+    console.log(
+      '  Files that may be rewritten: vguard.config.ts, .vguard/cache/, .claude/*, .cursor/*',
+    );
+    if (!nonInteractive) {
+      const confirmed = await confirm({
+        message: 'Continue and overwrite existing configuration?',
+        default: false,
+      });
+      if (!confirmed) {
+        console.log('\n  Aborted.\n');
+        return;
+      }
+    } else if (!options.yes) {
+      console.error(
+        color.red(
+          '  Refusing to overwrite existing config in non-interactive mode. Pass --yes to confirm.\n',
+        ),
+      );
+      process.exit(1);
+    }
     console.log('  Reconfiguring VGuard (--force)\n');
   }
 
@@ -47,115 +83,25 @@ export async function initCommand(options?: { force?: boolean }): Promise<void> 
     console.log(`  Detected: ${framework}\n`);
   }
 
-  // Interactive prompts
-  const answers = await inquirer.prompt([
-    {
-      type: 'checkbox',
-      name: 'presets',
-      message: 'Which presets do you want to enable?',
-      choices: Array.from(getAllPresets().values()).map((p) => ({
-        name: `${p.id} — ${p.description}`,
-        value: p.id,
-        checked: framework === 'nextjs' && p.id === 'nextjs-15',
-      })),
-    },
-    {
-      type: 'checkbox',
-      name: 'agents',
-      message: 'Which AI agents do you use?',
-      choices: [
-        { name: 'Claude Code (runtime enforcement)', value: 'claude-code', checked: true },
-        { name: 'Cursor (advisory)', value: 'cursor' },
-        { name: 'Codex (advisory)', value: 'codex' },
-        { name: 'OpenCode (advisory)', value: 'opencode' },
-      ],
-    },
-    {
-      type: 'input',
-      name: 'protectedBranches',
-      message: 'Protected branches (comma-separated):',
-      default: 'main, master',
-    },
-  ]);
+  const presetIds = await resolvePresets(options, framework, nonInteractive);
+  const agents = await resolveAgents(options, nonInteractive);
+  const selectedFolders = await resolveFolders(agents, nonInteractive);
+  const protectedBranches = await resolveProtectedBranches(options, nonInteractive);
+  const enableCloud = await resolveCloud(options, nonInteractive);
 
-  const selectedAgents = answers.agents as AgentType[];
-
-  // Ask about updating AI agent configuration folders
-  const folderChoices = buildFolderChoices(selectedAgents);
-
-  const folderAnswers = await inquirer.prompt([
-    {
-      type: 'checkbox',
-      name: 'folders',
-      message: 'Update AI agent configuration folders? (Recommended)',
-      choices: folderChoices,
-    },
-  ]);
-
-  const selectedFolders = new Set(folderAnswers.folders as string[]);
-
-  // Cloud setup prompt
-  const cloudAnswers = await inquirer.prompt([
-    {
-      type: 'confirm',
-      name: 'enableCloud',
-      message: 'Enable VGuard Cloud? (real-time telemetry dashboard)',
-      default: false,
-    },
-  ]);
-
-  if (cloudAnswers.enableCloud) {
-    const cloudMethod = await inquirer.prompt([
-      {
-        type: 'list',
-        name: 'authMethod',
-        message: 'How would you like to connect?',
-        choices: [
-          { name: 'Login via browser (recommended)', value: 'browser' },
-          { name: 'I have an API key', value: 'key' },
-          { name: 'Skip for now (configure later with `vguard cloud connect`)', value: 'skip' },
-        ],
-      },
-    ]);
-
-    if (cloudMethod.authMethod === 'browser') {
-      try {
-        const { cloudLoginCommand } = await import('./cloud-login.js');
-        await cloudLoginCommand({});
-        const { cloudConnectCommand } = await import('./cloud-connect.js');
-        await cloudConnectCommand({});
-      } catch {
-        console.log('  Cloud setup skipped — you can run `vguard cloud connect` later.\n');
-      }
-    } else if (cloudMethod.authMethod === 'key') {
-      const keyAnswers = await inquirer.prompt([
-        { type: 'input', name: 'key', message: 'API Key (vc_...):' },
-        { type: 'input', name: 'projectId', message: 'Project ID:' },
-      ]);
-      try {
-        const { cloudConnectCommand } = await import('./cloud-connect.js');
-        await cloudConnectCommand({ key: keyAnswers.key, projectId: keyAnswers.projectId });
-      } catch {
-        console.log('  Cloud setup skipped — you can run `vguard cloud connect` later.\n');
-      }
-    }
+  if (enableCloud && !nonInteractive) {
+    await handleCloudAuth();
   }
 
-  // Build config
-  const protectedBranches = (answers.protectedBranches as string)
-    .split(',')
-    .map((b: string) => b.trim())
-    .filter(Boolean);
-
   const config: VGuardConfig = {
-    presets: answers.presets as string[],
-    agents: selectedAgents,
+    presets: presetIds,
+    agents,
     rules: {
       'security/branch-protection': {
         protectedBranches,
       },
     },
-    ...(cloudAnswers.enableCloud
+    ...(enableCloud
       ? {
           cloud: {
             enabled: true,
@@ -165,7 +111,6 @@ export async function initCommand(options?: { force?: boolean }): Promise<void> 
       : {}),
   };
 
-  // Write config file
   const configContent = `import { defineConfig } from '@anthril/vguard';
 
 export default defineConfig(${JSON.stringify(config, null, 2)});
@@ -174,26 +119,20 @@ export default defineConfig(${JSON.stringify(config, null, 2)});
   await writeFile(join(projectRoot, 'vguard.config.ts'), configContent, 'utf-8');
   console.log('\n  Created vguard.config.ts');
 
-  // Resolve config
   const presetMap = getAllPresets();
   const resolvedConfig = resolveConfig(config, presetMap);
 
-  // Compile config for fast hook loading
   await compileConfig(resolvedConfig, projectRoot);
   console.log('  Created .vguard/cache/resolved-config.json');
 
-  // File writer with merge strategy handling
   const writeGeneratedFile = async (file: GeneratedFile) => {
     const fullPath = join(projectRoot, file.path);
-
-    // Handle create-only: skip if file already exists
     if (file.mergeStrategy === 'create-only') {
       if (existsSync(fullPath)) {
         console.log(`  Skipped ${file.path} (already exists)`);
         return;
       }
     }
-
     if (file.mergeStrategy === 'merge' && file.path.endsWith('settings.json')) {
       const generated = JSON.parse(file.content);
       await mergeSettings(projectRoot, generated);
@@ -205,34 +144,27 @@ export default defineConfig(${JSON.stringify(config, null, 2)});
     }
   };
 
-  // Generate adapter output for selected agents and folders
-  if (selectedAgents.includes('claude-code') && selectedFolders.has('claude-code')) {
+  if (agents.includes('claude-code') && selectedFolders.has('claude-code')) {
     const files = await claudeCodeAdapter.generate(resolvedConfig, projectRoot);
     for (const file of files) await writeGeneratedFile(file);
   }
-
-  if (selectedAgents.includes('cursor') && selectedFolders.has('cursor')) {
+  if (agents.includes('cursor') && selectedFolders.has('cursor')) {
     const files = await cursorAdapter.generate(resolvedConfig, projectRoot);
     for (const file of files) await writeGeneratedFile(file);
   }
-
-  if (selectedAgents.includes('codex') && selectedFolders.has('codex')) {
+  if (agents.includes('codex') && selectedFolders.has('codex')) {
     const files = await codexAdapter.generate(resolvedConfig, projectRoot);
     for (const file of files) await writeGeneratedFile(file);
   }
-
-  if (selectedAgents.includes('opencode') && selectedFolders.has('opencode')) {
+  if (agents.includes('opencode') && selectedFolders.has('opencode')) {
     const files = await openCodeAdapter.generate(resolvedConfig, projectRoot);
     for (const file of files) await writeGeneratedFile(file);
   }
-
-  // GitHub Actions is always generated
   if (selectedFolders.has('github-actions')) {
     const gaFiles = await githubActionsAdapter.generate(resolvedConfig, projectRoot);
     for (const file of gaFiles) await writeGeneratedFile(file);
   }
 
-  // Write starter .vguardignore (create-only — don't overwrite existing).
   const ignorePath = join(projectRoot, '.vguardignore');
   if (!existsSync(ignorePath)) {
     await writeFile(ignorePath, DEFAULT_VGUARDIGNORE, 'utf-8');
@@ -241,37 +173,156 @@ export default defineConfig(${JSON.stringify(config, null, 2)});
     console.log('  Skipped .vguardignore (already exists)');
   }
 
-  // Write COMMANDS.md reference + offer to add convenience npm scripts
-  await applyProjectIntegrations(projectRoot, { interactive: true });
+  await applyProjectIntegrations(projectRoot, { interactive: !nonInteractive });
 
-  // Summary
   const ruleCount = resolvedConfig.rules.size;
-  console.log(`\n  VGuard initialized with ${ruleCount} active rules.`);
+  console.log(`\n  ${color.green('VGuard initialized')} with ${ruleCount} active rules.`);
   console.log('  Run `vguard doctor` to verify your setup.\n');
 }
 
-/**
- * Build folder choices for the "update AI agent folders" prompt.
- * Selected agents are auto-checked.
- */
+async function resolvePresets(
+  options: InitOptions,
+  framework: string | null,
+  nonInteractive: boolean,
+): Promise<string[]> {
+  const availablePresets = Array.from(getAllPresets().values());
+  const availableIds = new Set(availablePresets.map((p) => p.id));
+
+  if (options.preset?.length) {
+    const unknown = options.preset.filter((id) => !availableIds.has(id));
+    if (unknown.length) {
+      throw new Error(`Unknown preset(s): ${unknown.join(', ')}`);
+    }
+    return options.preset;
+  }
+
+  if (nonInteractive) {
+    if (framework === 'nextjs' && availableIds.has('nextjs-15')) return ['nextjs-15'];
+    return [];
+  }
+
+  return (await checkbox({
+    message: 'Which presets do you want to enable?',
+    choices: availablePresets.map((p) => ({
+      name: `${p.id} ${color.dim('—')} ${p.description}`,
+      value: p.id,
+      checked: framework === 'nextjs' && p.id === 'nextjs-15',
+    })),
+  })) as string[];
+}
+
+async function resolveAgents(options: InitOptions, nonInteractive: boolean): Promise<AgentType[]> {
+  if (options.agent?.length) {
+    const unknown = options.agent.filter((id) => !KNOWN_AGENTS.includes(id as AgentType));
+    if (unknown.length) {
+      throw new Error(
+        `Unknown agent(s): ${unknown.join(', ')}. Valid: ${KNOWN_AGENTS.join(', ')}.`,
+      );
+    }
+    return options.agent as AgentType[];
+  }
+
+  if (nonInteractive) return ['claude-code'];
+
+  return (await checkbox({
+    message: 'Which AI agents do you use?',
+    choices: [
+      { name: 'Claude Code (runtime enforcement)', value: 'claude-code', checked: true },
+      { name: 'Cursor (advisory)', value: 'cursor' },
+      { name: 'Codex (advisory)', value: 'codex' },
+      { name: 'OpenCode (advisory)', value: 'opencode' },
+    ],
+  })) as AgentType[];
+}
+
+async function resolveFolders(
+  selectedAgents: AgentType[],
+  nonInteractive: boolean,
+): Promise<Set<FolderAgent>> {
+  if (nonInteractive) {
+    return new Set<FolderAgent>([...selectedAgents, 'github-actions']);
+  }
+
+  const folderChoices = buildFolderChoices(selectedAgents);
+  const selected = (await checkbox({
+    message: 'Update AI agent configuration folders? (Recommended)',
+    choices: folderChoices,
+  })) as FolderAgent[];
+  return new Set(selected);
+}
+
+async function resolveProtectedBranches(
+  options: InitOptions,
+  nonInteractive: boolean,
+): Promise<string[]> {
+  if (options.protectedBranches) {
+    return options.protectedBranches
+      .split(',')
+      .map((b) => b.trim())
+      .filter(Boolean);
+  }
+
+  if (nonInteractive) return ['main', 'master'];
+
+  const answer = await input({
+    message: 'Protected branches (comma-separated):',
+    default: 'main, master',
+  });
+  return answer
+    .split(',')
+    .map((b) => b.trim())
+    .filter(Boolean);
+}
+
+async function resolveCloud(options: InitOptions, nonInteractive: boolean): Promise<boolean> {
+  if (typeof options.cloud === 'boolean') return options.cloud;
+  if (nonInteractive) return false;
+  return await confirm({
+    message: 'Enable VGuard Cloud? (real-time telemetry dashboard)',
+    default: false,
+  });
+}
+
+async function handleCloudAuth(): Promise<void> {
+  const method = await select({
+    message: 'How would you like to connect?',
+    choices: [
+      { name: 'Login via browser (recommended)', value: 'browser' },
+      { name: 'I have an API key', value: 'key' },
+      { name: 'Skip for now (configure later with `vguard cloud connect`)', value: 'skip' },
+    ],
+  });
+
+  if (method === 'browser') {
+    try {
+      const { cloudLoginCommand } = await import('./cloud-login.js');
+      await cloudLoginCommand({});
+      const { cloudConnectCommand } = await import('./cloud-connect.js');
+      await cloudConnectCommand({});
+    } catch {
+      console.log('  Cloud setup skipped — you can run `vguard cloud connect` later.\n');
+    }
+  } else if (method === 'key') {
+    const key = await input({ message: 'API Key (vc_...):' });
+    const projectId = await input({ message: 'Project ID:' });
+    try {
+      const { cloudConnectCommand } = await import('./cloud-connect.js');
+      await cloudConnectCommand({ key, projectId });
+    } catch {
+      console.log('  Cloud setup skipped — you can run `vguard cloud connect` later.\n');
+    }
+  }
+}
+
 function buildFolderChoices(selectedAgents: AgentType[]) {
   const agentFolderMap: Record<string, { name: string; description: string }> = {
     'claude-code': {
       name: '.claude/',
       description: 'hooks, commands, and rules for Claude Code',
     },
-    cursor: {
-      name: '.cursor/',
-      description: 'rules for Cursor',
-    },
-    codex: {
-      name: '.codex/ + AGENTS.md',
-      description: 'instructions and guidelines for Codex',
-    },
-    opencode: {
-      name: '.opencode/',
-      description: 'instructions for OpenCode',
-    },
+    cursor: { name: '.cursor/', description: 'rules for Cursor' },
+    codex: { name: '.codex/ + AGENTS.md', description: 'instructions for Codex' },
+    opencode: { name: '.opencode/', description: 'instructions for OpenCode' },
   };
 
   const choices = Object.entries(agentFolderMap).map(([agentId, info]) => ({
@@ -280,7 +331,6 @@ function buildFolderChoices(selectedAgents: AgentType[]) {
     checked: selectedAgents.includes(agentId as AgentType),
   }));
 
-  // Always offer GitHub Actions
   choices.push({
     name: '.github/workflows/ — CI workflow for VGuard',
     value: 'github-actions',

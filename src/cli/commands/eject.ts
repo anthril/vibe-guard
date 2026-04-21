@@ -11,6 +11,11 @@ import { getAllPresets } from '../../config/presets.js';
 import { serializeConfig } from '../../config/compile.js';
 import { bundleHookScript } from '../../eject/bundler.js';
 import type { VGuardConfig, HookEvent, ResolvedConfig } from '../../types.js';
+import { printBanner } from '../ui/banner.js';
+import { color } from '../ui/colors.js';
+import { glyph } from '../ui/glyphs.js';
+import { error, info, warn } from '../ui/log.js';
+import { EXIT } from '../exit-codes.js';
 
 const HOOK_EVENTS: HookEvent[] = ['PreToolUse', 'PostToolUse', 'Stop'];
 
@@ -24,51 +29,46 @@ export async function ejectCommand(
   const adapter = options.adapter ?? 'claude-code';
   const outputDir = options.output ?? join('.vguard', 'ejected');
 
-  console.log('\n  VGuard Eject — Exporting standalone hooks...\n');
-  console.log('  WARNING: After ejecting, hooks will NOT receive updates.');
-  console.log('  You can safely remove VGuard from dependencies.\n');
+  printBanner('Eject', 'Exporting standalone hooks');
+  warn('  After ejecting, hooks will NOT receive updates.');
+  info('  You can safely remove VGuard from dependencies.\n');
 
-  // Load config
   const discovered = discoverConfigFile(projectRoot);
   if (!discovered) {
-    console.error('  No VGuard config found. Run `vguard init` first.');
-    process.exit(1);
+    error('No VGuard config found. Run `vguard init` first.');
+    process.exit(EXIT.NO_INPUT);
   }
 
   const rawConfig = await readRawConfig(discovered);
   const presetMap = getAllPresets();
   const resolvedConfig = resolveConfig(rawConfig as VGuardConfig, presetMap);
 
-  // Generate bundled hook scripts
   for (const event of HOOK_EVENTS) {
     const script = bundleHookScript(event, resolvedConfig);
     const scriptPath = join(projectRoot, outputDir, `vguard-${event.toLowerCase()}.js`);
     await mkdir(dirname(scriptPath), { recursive: true });
     await writeFile(scriptPath, script, 'utf-8');
-    console.log(`  Created ${scriptPath}`);
+    info(`  ${color.green(glyph('pass'))} Created ${scriptPath}`);
   }
 
-  // Save frozen config
   const serialized = serializeConfig(resolvedConfig);
   const configPath = join(projectRoot, outputDir, 'frozen-config.json');
   await writeFile(configPath, JSON.stringify(serialized, null, 2), 'utf-8');
-  console.log(`  Created ${configPath}`);
+  info(`  ${color.green(glyph('pass'))} Created ${configPath}`);
 
-  // Generate eject readme
   const readmePath = join(projectRoot, outputDir, 'VGUARD-EJECTED.md');
   await writeFile(readmePath, generateEjectReadme(resolvedConfig, outputDir), 'utf-8');
-  console.log(`  Created ${readmePath}`);
+  info(`  ${color.green(glyph('pass'))} Created ${readmePath}`);
 
-  // Auto-update .claude/settings.json if adapter is claude-code
   if (adapter === 'claude-code') {
     await updateClaudeSettings(projectRoot, outputDir);
   }
 
-  console.log('\n  Ejected successfully.');
+  info(`\n  ${color.green('Ejected successfully.')}`);
   if (adapter === 'claude-code') {
-    console.log('  .claude/settings.json has been updated to use ejected hooks.');
+    info('  .claude/settings.json has been updated to use ejected hooks.');
   }
-  console.log('  You can now remove VGuard from your dependencies.\n');
+  info('  You can now remove VGuard from your dependencies.\n');
 }
 
 async function updateClaudeSettings(projectRoot: string, outputDir: string): Promise<void> {
@@ -105,7 +105,7 @@ async function updateClaudeSettings(projectRoot: string, outputDir: string): Pro
 
   await mkdir(dirname(settingsPath), { recursive: true });
   await writeFile(settingsPath, JSON.stringify(settings, null, 2), 'utf-8');
-  console.log(`  Updated ${settingsPath}`);
+  info(`  ${color.green(glyph('pass'))} Updated ${settingsPath}`);
 }
 
 function generateEjectReadme(config: ResolvedConfig, outputDir: string): string {

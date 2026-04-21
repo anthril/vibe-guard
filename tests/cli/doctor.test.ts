@@ -37,14 +37,19 @@ import { doctorCommand } from '../../src/cli/commands/doctor.js';
 
 describe('doctorCommand', () => {
   let consoleSpy: ReturnType<typeof vi.spyOn>;
+  let exitSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    exitSpy = vi
+      .spyOn(process, 'exit')
+      .mockImplementation(((_code?: number) => undefined) as never);
   });
 
   afterEach(() => {
     consoleSpy.mockRestore();
+    exitSpy.mockRestore();
   });
 
   it('reports fail when no config found', async () => {
@@ -118,6 +123,40 @@ describe('doctorCommand', () => {
     await doctorCommand();
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('settings.json'));
+  });
+
+  it('emits JSON when --json is set and exits non-zero on fail', async () => {
+    vi.mocked(discoverConfigFile).mockReturnValue(null);
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    await doctorCommand({ json: true });
+
+    const written = stdoutSpy.mock.calls.map((c) => String(c[0])).join('');
+    stdoutSpy.mockRestore();
+    const payload = JSON.parse(written);
+    expect(payload.status).toBe('fail');
+    expect(payload.checks).toBeInstanceOf(Array);
+    expect(payload.checks[0].status).toBe('fail');
+    expect(exitSpy).toHaveBeenCalledWith(78);
+  });
+
+  it('with --strict promotes warnings to failures', async () => {
+    vi.mocked(discoverConfigFile).mockReturnValue({
+      path: '/project/vguard.config.ts',
+      format: 'ts' as const,
+    });
+    vi.mocked(readRawConfig).mockResolvedValue({ presets: [] });
+    vi.mocked(resolveConfig).mockReturnValue({
+      presets: [],
+      agents: [],
+      rules: new Map([
+        ['quality/anti-patterns', { enabled: true, severity: 'warn' as const, options: {} }],
+      ]),
+    });
+
+    await doctorCommand({ strict: true });
+
+    expect(exitSpy).toHaveBeenCalledWith(78);
   });
 });
 

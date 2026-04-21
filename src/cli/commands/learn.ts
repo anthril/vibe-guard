@@ -1,29 +1,30 @@
 import { walkProject } from '../../learn/walker.js';
 import { aggregateConventions, saveConventions } from '../../learn/aggregator.js';
 import { getPromotionSuggestions } from '../../learn/promoter.js';
+import { startSpinner } from '../ui/spinner.js';
+import { printBanner } from '../ui/banner.js';
 
 export async function learnCommand(): Promise<void> {
   const projectRoot = process.cwd();
 
-  console.log('\n  VGuard Learn — Scanning codebase for conventions...\n');
+  printBanner('Learn', 'Scanning codebase for conventions');
 
   const startTime = Date.now();
 
-  // Walk the project
+  const spinner = startSpinner('Walking project files');
   const files = walkProject({ rootDir: projectRoot });
   const scanTime = Date.now() - startTime;
+  spinner.succeed(`Scanned ${files.length} files in ${scanTime}ms`);
 
   if (files.length === 0) {
     console.log('  No source files found to analyze.\n');
     return;
   }
 
-  console.log(`  Scanned ${files.length} files in ${scanTime}ms\n`);
-
-  // Aggregate conventions
+  const aggregationSpinner = startSpinner('Aggregating conventions');
   const report = aggregateConventions(files, projectRoot);
+  aggregationSpinner.succeed('Conventions aggregated');
 
-  // Save report
   const outputPath = await saveConventions(report, projectRoot);
   console.log(`  Saved conventions to ${outputPath}\n`);
 

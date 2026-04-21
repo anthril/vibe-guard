@@ -7,6 +7,102 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.2] - 2026-04-21
+
+### Added
+
+- **`doctor --json` and `--strict`** — `vguard doctor` now emits a stable JSON
+  payload (`{status, strict, checks[]}` with `schema` field for versioning)
+  for CI consumption. `--strict` promotes any warning to a failure. See the
+  new "Exit codes" section in the README for how to gate deploys on these.
+- **Global `--quiet` / `--verbose` flags** — `--quiet` (alias `-q`) suppresses
+  banners, progress spinners, and summaries while preserving machine output
+  on stdout. `--verbose` prints extra `[verbose]` diagnostic lines on stderr.
+  Mutually exclusive.
+- **NDJSON lint format** — `vguard lint --format ndjson` emits one
+  JSON object per line (a `type:"summary"` envelope followed by
+  `type:"issue"` records), stable under `schema: "v1"`.
+- **Dynamic shell completions** — `vguard completion <bash|zsh|fish|powershell>`
+  now tab-completes real rule IDs, preset IDs, and `preset:<id>` variants by
+  invoking the CLI's `--json` listing commands at tab time. Static subcommand
+  completions retained.
+- **Full sysexits exit-code mapping** — commands now return sysexits-style
+  codes so CI scripts can branch precisely: `2` (USAGE), `66` (NO_INPUT),
+  `69` (UNAVAILABLE), `70` (SOFTWARE), `77` (NO_PERM), `78` (CONFIG),
+  `130` (SIGINT). `0` and `1` (LINT_BLOCKING) unchanged. Documented in
+  the README.
+- **`init` non-interactive mode** — new `--yes`, `--preset`, `--agent`,
+  `--protected-branches`, `--cloud`/`--no-cloud` flags let CI / scripts
+  configure VGuard without prompts. `init --force` now confirms before
+  overwriting and refuses in non-interactive mode unless `--yes` is passed.
+- **Top-level error boundary** — fatal errors print `vguard: error: <msg>`
+  and hide the stack trace unless `--debug` or `DEBUG=vguard*` is set.
+- **Global SIGINT handler** — Ctrl+C during any command exits cleanly
+  with code 130. Inquirer's `ExitPromptError` is recognised and handled
+  silently (no ugly "User force closed the prompt" line).
+- **Short flag aliases** — `-f`/`-y`/`-p`/`-a`/`-b`/`-j`/`-o`/`-n` added
+  across `init`, `lint`, `report`, `eject`, `fix`, `sync`, `rules list`,
+  `presets list`, `config show`, `cloud login`.
+- **Mutually exclusive `upgrade --check` / `--apply`** — passing both now
+  errors with a clear message.
+- **`--version` / `version` unified** — both emit the same
+  `vguard 2.0.2 (<sha>, <date>)` string, injected at build time via tsup
+  `define` instead of an fs lookup.
+- **Examples in every command's `--help`** — `init`, `add`, `remove`,
+  `generate`, `doctor`, `lint`, `learn`, `report`, `eject`, `upgrade`,
+  `fix`, `cloud login`, `completion`, and the sub-groups all have
+  copy-pasteable example blocks.
+- **Consistent banner / colour / glyph system** — every command now uses
+  the new `banner()`/`color.*`/`glyph()` helpers. ASCII fallback via
+  `--ascii` or `LANG=C`/`TERM=dumb`. No more raw `✓`/`✗` bytes or
+  ad-hoc `VGuard X — Y` strings.
+
+### Changed
+
+- **`vguard add` / `remove` argument is now optional** ([#34](https://github.com/anthril/vibe-guard/issues/34)) —
+  running either command without an id no longer emits commander's terse
+  "missing required argument" error. Instead, VGuard prints a structured
+  help block with real example ids, the discovery commands
+  (`vguard rules list --all`, `vguard presets list`), and exits with
+  code 2 (USAGE).
+- **`reliability/no-unhandled-promises` rule rewritten** ([#33](https://github.com/anthril/vibe-guard/issues/33)) —
+  the previous 3-line-window `.catch` lookahead produced false positives
+  on any legitimately multi-line `.then(...)` body. Detection is now
+  chain-aware: strings and comments are masked, `.then(...)` closing
+  parens are matched, the two-argument `.then(onOk, onErr)` form is
+  recognised as handled, and the scan walks forward at brace/paren depth
+  zero until the enclosing statement ends. Fixes the common
+  `promise.then(longBody).catch(handler)` false-positive pattern.
+- **Group commands show help on stdout, exit 0** — `vguard rules`,
+  `vguard presets`, `vguard config`, `vguard cloud`, `vguard ignore`
+  (no subcommand) now print their help to stdout with a zero exit code
+  instead of commander's default "exit 1 via stderr".
+- **`doctor` exits non-zero on fail** — previously `vguard doctor` exited
+  `0` even when checks failed, making it unsuitable as a CI gate. It now
+  exits `78` (EX_CONFIG) when any check fails.
+- **Inquirer migration** — replaced the legacy `inquirer@13` default
+  export with `@inquirer/prompts@8` named exports. Resolves a CJS-interop
+  crash that broke `vguard init` for all users on 2.0.x.
+- **Commander `exitOverride` applied recursively** — every subcommand
+  now routes usage errors through the top-level error boundary so exit
+  codes follow the sysexits mapping (previously a subcommand's bad-flag
+  error bypassed the boundary and exited with commander's default `1`).
+
+### Fixed
+
+- **`--version` reported `0.0.0`** — the version lookup relied on a
+  relative-path `fs.readFileSync` that didn't work in the flat `dist/`
+  bundle. Version is now injected at build time.
+- **`vguard init` crashed with a raw stack trace** — inquirer v13's
+  default export didn't round-trip through tsup's CJS emission. Swapped
+  to `@inquirer/prompts`.
+
+### Removed
+
+- **Legacy `inquirer` dependency** — replaced by `@inquirer/prompts`.
+- **Dead code in `src/cli/commands/lint.ts`** — `isValidLintFormat` and
+  `LINT_FORMAT_CHOICES` were superseded by commander's `.choices()`.
+
 ## [2.0.1] - 2026-04-12
 
 ### Fixed

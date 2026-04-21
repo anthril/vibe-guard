@@ -11,6 +11,11 @@ import { getAllRules } from '../../engine/registry.js';
 import { readPerfEntries, calculatePerfStats, PERF_BUDGET_MS } from '../../engine/perf.js';
 import { createIgnoreMatcher, HARDCODED_DEFAULTS } from '../../utils/ignore.js';
 import type { VGuardConfig } from '../../types.js';
+import { color } from '../ui/colors.js';
+import { glyph } from '../ui/glyphs.js';
+import { printBanner } from '../ui/banner.js';
+import { info } from '../ui/log.js';
+import { EXIT } from '../exit-codes.js';
 
 interface CheckResult {
   name: string;
@@ -18,13 +23,19 @@ interface CheckResult {
   message: string;
 }
 
-export async function doctorCommand(): Promise<void> {
+export interface DoctorOptions {
+  json?: boolean;
+  strict?: boolean;
+}
+
+export async function doctorCommand(options: DoctorOptions = {}): Promise<void> {
   const projectRoot = process.cwd();
   const results: CheckResult[] = [];
 
-  console.log('\n  VGuard Doctor\n');
+  if (!options.json) {
+    printBanner('Doctor', 'Config & hook health check');
+  }
 
-  // 1. Check config file exists
   const discovered = discoverConfigFile(projectRoot);
   if (!discovered) {
     results.push({
@@ -32,16 +43,16 @@ export async function doctorCommand(): Promise<void> {
       status: 'fail',
       message: 'No VGuard config found. Run `vguard init`.',
     });
-    printResults(results);
+    finalize(results, options);
     return;
   }
+
   results.push({
     name: 'Config file',
     status: 'pass',
     message: `Found ${discovered.path}`,
   });
 
-  // 2. Validate config
   let resolvedConfig;
   let rawConfig: VGuardConfig;
   try {
@@ -53,17 +64,16 @@ export async function doctorCommand(): Promise<void> {
       status: 'pass',
       message: `${resolvedConfig.rules.size} rules configured`,
     });
-  } catch (error) {
+  } catch (err) {
     results.push({
       name: 'Config valid',
       status: 'fail',
-      message: error instanceof Error ? error.message : 'Unknown error',
+      message: err instanceof Error ? err.message : 'Unknown error',
     });
-    printResults(results);
+    finalize(results, options);
     return;
   }
 
-  // 3. Check for unknown rules
   const allRuleIds = new Set(getAllRules().keys());
   for (const [ruleId, ruleConfig] of resolvedConfig.rules) {
     if (ruleConfig.enabled && !allRuleIds.has(ruleId)) {
@@ -75,7 +85,6 @@ export async function doctorCommand(): Promise<void> {
     }
   }
 
-  // 4. Check active rules
   const enabledRules = Array.from(resolvedConfig.rules.entries()).filter(([, c]) => c.enabled);
   const securityRules = enabledRules.filter(([id]) => id.startsWith('security/'));
 
@@ -94,7 +103,6 @@ export async function doctorCommand(): Promise<void> {
     });
   }
 
-  // 5. Check pre-compiled config cache
   const cachePath = join(projectRoot, '.vguard', 'cache', 'resolved-config.json');
   if (!existsSync(cachePath)) {
     results.push({
@@ -110,7 +118,6 @@ export async function doctorCommand(): Promise<void> {
     });
   }
 
-  // 6. Check Claude Code hooks
   if (resolvedConfig.agents.includes('claude-code')) {
     const settingsPath = join(projectRoot, '.claude', 'settings.json');
     if (!existsSync(settingsPath)) {
@@ -127,7 +134,6 @@ export async function doctorCommand(): Promise<void> {
       });
     }
 
-    // Check hook scripts
     const hookDir = join(projectRoot, '.vguard', 'hooks');
     if (!existsSync(hookDir)) {
       results.push({
@@ -144,7 +150,6 @@ export async function doctorCommand(): Promise<void> {
     }
   }
 
-  // 7. Check performance budget
   const perfEntries = readPerfEntries(projectRoot);
   if (perfEntries.length > 0) {
     const stats = calculatePerfStats(perfEntries);
@@ -158,12 +163,11 @@ export async function doctorCommand(): Promise<void> {
       results.push({
         name: 'Performance',
         status: 'pass',
-        message: `Hook p95 is ${stats.p95Ms}ms (budget: ${PERF_BUDGET_MS}ms) — ${stats.count} samples.`,
+        message: `Hook p95 is ${stats.p95Ms}ms (budget: ${PERF_BUDGET_MS}ms) - ${stats.count} samples.`,
       });
     }
   }
 
-  // 8. Check node_modules
   const vguardInModules = existsSync(join(projectRoot, 'node_modules', 'vguard'));
   if (!vguardInModules) {
     results.push({
@@ -173,7 +177,6 @@ export async function doctorCommand(): Promise<void> {
     });
   }
 
-  // 9. Check .vguardignore + legacy ignore-field deprecations.
   const matcher = createIgnoreMatcher(projectRoot);
   if (matcher.hasFile) {
     results.push({
@@ -186,7 +189,7 @@ export async function doctorCommand(): Promise<void> {
       name: 'Ignore rules',
       status: 'warn',
       message:
-        'No .vguardignore found — using defaults only. Run `vguard ignore init` to add project-specific excludes.',
+        'No .vguardignore found - using defaults only. Run `vguard ignore init` to add project-specific excludes.',
     });
   }
 
@@ -195,7 +198,7 @@ export async function doctorCommand(): Promise<void> {
     results.push({
       name: 'Legacy config',
       status: 'warn',
-      message: `learn.ignorePaths is deprecated (${learnIgnore} entries) — move them to .vguardignore so they apply to lint + hooks too.`,
+      message: `learn.ignorePaths is deprecated (${learnIgnore} entries) - move them to .vguardignore so they apply to lint + hooks too.`,
     });
   }
 
@@ -204,28 +207,58 @@ export async function doctorCommand(): Promise<void> {
     results.push({
       name: 'Legacy config',
       status: 'warn',
-      message: `cloud.excludePaths is deprecated (${cloudExclude} entries) — move them to .vguardignore for project-wide exclusion.`,
+      message: `cloud.excludePaths is deprecated (${cloudExclude} entries) - move them to .vguardignore for project-wide exclusion.`,
     });
   }
 
-  printResults(results);
+  finalize(results, options);
 }
 
-function printResults(results: CheckResult[]): void {
-  const icons = { pass: '\u2713', warn: '!', fail: '\u2717' };
-  let hasIssues = false;
+function finalize(results: CheckResult[], options: DoctorOptions): void {
+  const hasFail = results.some((r) => r.status === 'fail');
+  const hasWarn = results.some((r) => r.status === 'warn');
+  const effectiveStatus: 'pass' | 'warn' | 'fail' = hasFail ? 'fail' : hasWarn ? 'warn' : 'pass';
+
+  if (options.json) {
+    const payload = {
+      status: effectiveStatus,
+      strict: Boolean(options.strict),
+      checks: results,
+    };
+    process.stdout.write(JSON.stringify(payload, null, 2) + '\n');
+    const exitCode = hasFail ? EXIT.CONFIG : hasWarn && options.strict ? EXIT.CONFIG : EXIT.OK;
+    process.exit(exitCode);
+  }
 
   for (const result of results) {
-    const icon = icons[result.status];
-    const prefix = result.status === 'pass' ? '  ' : result.status === 'warn' ? '  ' : '  ';
-    console.log(`${prefix}${icon} ${result.name}: ${result.message}`);
-    if (result.status !== 'pass') hasIssues = true;
+    let icon: string;
+    if (result.status === 'pass') {
+      icon = color.green(glyph('pass'));
+    } else if (result.status === 'warn') {
+      icon = color.yellow(glyph('warn'));
+    } else {
+      icon = color.red(glyph('fail'));
+    }
+    info(`  ${icon} ${color.bold(result.name)}: ${result.message}`);
   }
 
-  console.log();
-  if (hasIssues) {
-    console.log('  Some issues found. Fix them and run `vguard doctor` again.\n');
-  } else {
-    console.log('  All checks passed. VGuard is healthy.\n');
+  info('');
+  if (hasFail) {
+    info(`  ${color.red('Some checks failed.')} Fix them and run \`vguard doctor\` again.\n`);
+    process.exit(EXIT.CONFIG);
   }
+
+  if (hasWarn && options.strict) {
+    info(
+      `  ${color.red('Warnings detected and --strict is set.')} Treating warnings as failures.\n`,
+    );
+    process.exit(EXIT.CONFIG);
+  }
+
+  if (hasWarn) {
+    info(`  ${color.yellow('Completed with warnings.')} Review the items above.\n`);
+  } else {
+    info(`  ${color.green('All checks passed.')} VGuard is healthy.\n`);
+  }
+  process.exit(EXIT.OK);
 }

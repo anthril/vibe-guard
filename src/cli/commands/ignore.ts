@@ -25,6 +25,11 @@ import {
 import { normalizePath } from '../../utils/path.js';
 import { isAbsolute, relative, resolve } from 'node:path';
 import { DEFAULT_VGUARDIGNORE } from './init-templates/vguardignore.js';
+import { printBanner } from '../ui/banner.js';
+import { color } from '../ui/colors.js';
+import { glyph } from '../ui/glyphs.js';
+import { error, info } from '../ui/log.js';
+import { EXIT } from '../exit-codes.js';
 
 function ignorePath(projectRoot: string): string {
   return join(projectRoot, VGUARD_IGNORE_FILENAME);
@@ -55,30 +60,32 @@ export function ignoreListCommand(): void {
   const projectRoot = process.cwd();
   const matcher = createIgnoreMatcher(projectRoot);
 
-  console.log('\n  VGuard ignore patterns\n');
+  printBanner('Ignore', 'Active ignore patterns');
 
-  console.log('  [default]  (always-on, built-in)');
+  info(`  ${color.bold('[default]')}  ${color.dim('(always-on, built-in)')}`);
   for (const pattern of HARDCODED_DEFAULTS) {
-    console.log(`    ${pattern}`);
+    info(color.dim(`    ${pattern}`));
   }
 
   if (matcher.hasFile) {
-    console.log(`\n  [${VGUARD_IGNORE_FILENAME}]  ${matcher.filePatterns.length} pattern(s)`);
+    info(
+      `\n  ${color.bold(`[${VGUARD_IGNORE_FILENAME}]`)}  ${matcher.filePatterns.length} pattern(s)`,
+    );
     if (matcher.filePatterns.length === 0) {
-      console.log('    (no non-comment patterns)');
+      info(color.dim('    (no non-comment patterns)'));
     } else {
       for (const pattern of matcher.filePatterns) {
-        console.log(`    ${pattern}`);
+        info(`    ${pattern}`);
       }
     }
   } else {
-    console.log(
-      `\n  [${VGUARD_IGNORE_FILENAME}]  (not found) — run \`vguard ignore init\` to create one`,
+    info(
+      `\n  ${color.bold(`[${VGUARD_IGNORE_FILENAME}]`)}  ${color.dim('(not found)')} - run \`vguard ignore init\` to create one`,
     );
   }
 
   const total = HARDCODED_DEFAULTS.length + matcher.filePatterns.length;
-  console.log(`\n  ${total} pattern(s) total\n`);
+  info(`\n  ${total} pattern(s) total\n`);
 }
 
 /**
@@ -88,12 +95,12 @@ export function ignoreListCommand(): void {
 export async function ignoreAddCommand(pattern: string): Promise<void> {
   const trimmed = pattern.trim();
   if (!trimmed) {
-    console.error('  Pattern cannot be empty.');
-    process.exit(1);
+    error('Pattern cannot be empty.');
+    process.exit(EXIT.USAGE);
   }
   if (trimmed.startsWith('#')) {
-    console.error('  Refusing to add a comment as a pattern.');
-    process.exit(1);
+    error('Refusing to add a comment as a pattern.');
+    process.exit(EXIT.USAGE);
   }
 
   const projectRoot = process.cwd();
@@ -101,20 +108,22 @@ export async function ignoreAddCommand(pattern: string): Promise<void> {
 
   let content: string;
   if (existing === null) {
-    // Create from template + the new pattern at the end.
     content = DEFAULT_VGUARDIGNORE.trimEnd() + '\n\n' + trimmed + '\n';
-    console.log(`  Created ${VGUARD_IGNORE_FILENAME} with "${trimmed}".`);
+    info(
+      `  ${color.green(glyph('pass'))} Created ${VGUARD_IGNORE_FILENAME} with "${color.bold(trimmed)}".`,
+    );
   } else {
-    // Duplicate check against non-comment lines.
     const lines = existing.split(/\r?\n/);
     const alreadyPresent = lines.map((l) => l.trim()).some((l) => l === trimmed);
     if (alreadyPresent) {
-      console.log(`  "${trimmed}" is already in ${VGUARD_IGNORE_FILENAME}.`);
+      info(`  "${trimmed}" is already in ${VGUARD_IGNORE_FILENAME}.`);
       return;
     }
     const needsNewline = !existing.endsWith('\n');
     content = existing + (needsNewline ? '\n' : '') + trimmed + '\n';
-    console.log(`  Added "${trimmed}" to ${VGUARD_IGNORE_FILENAME}.`);
+    info(
+      `  ${color.green(glyph('pass'))} Added "${color.bold(trimmed)}" to ${VGUARD_IGNORE_FILENAME}.`,
+    );
   }
 
   await writeRaw(projectRoot, content);
@@ -128,14 +137,14 @@ export async function ignoreAddCommand(pattern: string): Promise<void> {
 export async function ignoreRemoveCommand(pattern: string): Promise<void> {
   const trimmed = pattern.trim();
   if (!trimmed) {
-    console.error('  Pattern cannot be empty.');
-    process.exit(1);
+    error('Pattern cannot be empty.');
+    process.exit(EXIT.USAGE);
   }
 
   const projectRoot = process.cwd();
   const existing = readRaw(projectRoot);
   if (existing === null) {
-    console.log(`  No ${VGUARD_IGNORE_FILENAME} found — nothing to remove.`);
+    info(`  No ${VGUARD_IGNORE_FILENAME} found - nothing to remove.`);
     return;
   }
 
@@ -150,13 +159,15 @@ export async function ignoreRemoveCommand(pattern: string): Promise<void> {
   });
 
   if (removed === 0) {
-    console.log(`  "${trimmed}" is not in ${VGUARD_IGNORE_FILENAME}.`);
+    info(`  "${trimmed}" is not in ${VGUARD_IGNORE_FILENAME}.`);
     return;
   }
 
   await writeRaw(projectRoot, next.join('\n'));
   clearIgnoreMatcherCache();
-  console.log(`  Removed "${trimmed}" from ${VGUARD_IGNORE_FILENAME}.`);
+  info(
+    `  ${color.green(glyph('pass'))} Removed "${color.bold(trimmed)}" from ${VGUARD_IGNORE_FILENAME}.`,
+  );
 }
 
 /**
@@ -164,43 +175,42 @@ export async function ignoreRemoveCommand(pattern: string): Promise<void> {
  */
 export function ignoreCheckCommand(path: string): void {
   if (!path) {
-    console.error('  Usage: vguard ignore check <path>');
-    process.exit(1);
+    error('Usage: vguard ignore check <path>');
+    process.exit(EXIT.USAGE);
   }
   const projectRoot = process.cwd();
   const matcher = createIgnoreMatcher(projectRoot);
   const isIgnored = matcher.isIgnored(path);
 
   if (!isIgnored) {
-    console.log(`  included ${path}`);
-    console.log('           (no pattern matched)');
+    info(`  ${color.green(glyph('pass'))} included ${color.bold(path)}`);
+    info(color.dim('           (no pattern matched)'));
     return;
   }
 
-  console.log(`  ignored  ${path}`);
+  info(`  ${color.red(glyph('fail'))} ignored  ${color.bold(path)}`);
 
-  // Test each bucket separately to tell the user WHICH source matched.
   const rel = toRelativeForIgnore(projectRoot, path);
   if (!rel) {
-    console.log('           (matched)');
+    info(color.dim('           (matched)'));
     return;
   }
 
   const defaultsIg = ignorePkg().add([...HARDCODED_DEFAULTS]);
   if (defaultsIg.ignores(rel)) {
-    console.log('           (matched by built-in default)');
+    info(color.dim('           (matched by built-in default)'));
     return;
   }
 
   if (matcher.filePatterns.length > 0) {
     const fileIg = ignorePkg().add(matcher.filePatterns);
     if (fileIg.ignores(rel)) {
-      console.log(`           (matched by ${VGUARD_IGNORE_FILENAME})`);
+      info(color.dim(`           (matched by ${VGUARD_IGNORE_FILENAME})`));
       return;
     }
   }
 
-  console.log('           (matched by a passed-in extra pattern)');
+  info(color.dim('           (matched by a passed-in extra pattern)'));
 }
 
 function toRelativeForIgnore(projectRoot: string, filePath: string): string {
@@ -219,10 +229,10 @@ export async function ignoreInitCommand(): Promise<void> {
   const projectRoot = process.cwd();
   const path = ignorePath(projectRoot);
   if (existsSync(path)) {
-    console.log(`  ${VGUARD_IGNORE_FILENAME} already exists — leaving it untouched.`);
+    info(`  ${VGUARD_IGNORE_FILENAME} already exists - leaving it untouched.`);
     return;
   }
   await writeRaw(projectRoot, DEFAULT_VGUARDIGNORE);
   clearIgnoreMatcherCache();
-  console.log(`  Created ${VGUARD_IGNORE_FILENAME}`);
+  info(`  ${color.green(glyph('pass'))} Created ${VGUARD_IGNORE_FILENAME}`);
 }

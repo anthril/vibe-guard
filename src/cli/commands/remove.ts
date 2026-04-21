@@ -2,13 +2,27 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 
-export async function removeCommand(id: string): Promise<void> {
+import { printBanner } from '../ui/banner.js';
+import { color } from '../ui/colors.js';
+import { glyph } from '../ui/glyphs.js';
+import { error, info } from '../ui/log.js';
+import { EXIT } from '../exit-codes.js';
+import { emitMissingIdHelp } from './add.js';
+
+export async function removeCommand(id?: string): Promise<void> {
+  if (!id) {
+    emitMissingIdHelp('remove');
+    process.exit(EXIT.USAGE);
+  }
+
   const projectRoot = process.cwd();
   const configPath = findConfigPath(projectRoot);
 
+  printBanner('Remove', id);
+
   if (!configPath) {
-    console.error('  No VGuard config found. Run `vguard init` first.');
-    process.exit(1);
+    error('No VGuard config found. Run `vguard init` first.');
+    process.exit(EXIT.NO_INPUT);
   }
 
   const isPreset = id.startsWith('preset:');
@@ -20,23 +34,23 @@ export async function removeCommand(id: string): Promise<void> {
 
     if (isPreset) {
       config.presets = (config.presets ?? []).filter((p: string) => p !== actualId);
-    } else {
-      if (config.rules) {
-        config.rules[actualId] = false;
-      }
+    } else if (config.rules) {
+      config.rules[actualId] = false;
     }
 
     await writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
-    console.log(`  Removed ${isPreset ? 'preset' : 'rule'}: ${actualId}`);
-    console.log('  Run `vguard generate` to update hooks.\n');
+    info(
+      `  ${color.yellow(glyph('dot'))} Removed ${isPreset ? 'preset' : 'rule'}: ${color.bold(actualId)}`,
+    );
+    info('  Run `vguard generate` to update hooks.\n');
   } else {
-    console.log(`\n  To remove from your vguard.config.ts:\n`);
+    info(`\n  To remove from your vguard.config.ts:\n`);
     if (isPreset) {
-      console.log(`    Remove '${actualId}' from the presets array.`);
+      info(color.cyan(`    Remove '${actualId}' from the presets array.`));
     } else {
-      console.log(`    Set '${actualId}': false in the rules object.`);
+      info(color.cyan(`    Set '${actualId}': false in the rules object.`));
     }
-    console.log(`\n  Then run \`vguard generate\` to update hooks.\n`);
+    info(`\n  Then run \`vguard generate\` to update hooks.\n`);
   }
 }
 

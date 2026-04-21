@@ -63,6 +63,8 @@ describe('security templates', () => {
   it('rlsRequired generates SQL policy check', () => {
     const code = security.rlsRequired(makeCtx({ ruleId: 'security/rls-required' }));
     expect(code).toContain('rls-required');
+    expect(code).toMatch(/rls|row level security/i);
+    expect(code).toMatch(/sql|policy|create policy|alter table/i);
   });
 
   it('dependencyAudit generates dependency check', () => {

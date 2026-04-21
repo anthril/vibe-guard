@@ -182,6 +182,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Chore
 
+- **Pre-commit hook now runs `npm run format:check`** alongside the
+  existing lint + type-check. The previous hook shipped silent
+  Prettier drift to CI — caught during the plan-completion audit on
+  2026-04-22 when 9 of 12 in-flight PRs failed the `quality` job for
+  format-only reasons. Drift now fails at `git commit` time with a
+  clear Prettier message.
+- **Pre-commit hook now rejects `package-lock.json` version drift.**
+  The one-line Node guard runs after every commit attempt; on
+  mismatch it points at `npm install --package-lock-only`. Closes
+  the optional prevention half of #52 called out in PR #67.
 - **Regenerated `package-lock.json`** after the v2.0.1 → v3.0.0 bump
   so the lockfile's top-level `version` field matches `package.json`.
   `npm ci` now reproduces the intended dev tree instead of the v2.0.1

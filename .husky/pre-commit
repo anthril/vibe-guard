@@ -1,4 +1,12 @@
-npm run lint && npm run type-check
+npm run lint && npm run type-check && npm run format:check
+
+# ── Lockfile ↔ package.json version match ──
+# Catch the class of bug where package.json is bumped but the lockfile's
+# top-level `version` field is forgotten, so `npm ci` on a clean clone
+# reproduces the pre-bump tree. Surfaced from issue #52 on 2026-04-22.
+if [ -f package-lock.json ]; then
+  node -e 'const p=require("./package.json"); const l=require("./package-lock.json"); if (p.version !== l.version) { console.error("\n  ERROR: package-lock.json version ("+l.version+") does not match package.json ("+p.version+")."); console.error("  Fix: npm install --package-lock-only && git add package-lock.json\n"); process.exit(1); }' || exit 1
+fi
 
 # ── Skip CHANGELOG/version checks on merge commits ──
 # Merge commits consolidate existing history; they don't introduce new

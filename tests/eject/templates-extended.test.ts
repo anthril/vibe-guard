@@ -108,6 +108,8 @@ describe('quality templates', () => {
   it('noUseClientInPages checks for use client directive', () => {
     const code = quality.noUseClientInPages(makeCtx({ ruleId: 'quality/no-use-client-in-pages' }));
     expect(code).toContain('no-use-client-in-pages');
+    expect(code).toContain('use client');
+    expect(code).toContain('directive');
   });
 
   it('noDeprecatedApi generates deprecation check', () => {

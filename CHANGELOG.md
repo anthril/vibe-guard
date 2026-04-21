@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Testing
+
+- Merged three GitHub Copilot Autofix PRs (#37, #38, #39) targeting
+  test files: doctor-test import-ordering cleanup, npm-package-name
+  boundary + scoped-uppercase assertions, and tighter eject template
+  assertions. PRs #41 (comment-only cloud-login no-op) and #42 (against
+  a file that no longer exists) were not merged.
+
 ## [3.0.0] - 2026-04-22
 
 v3.0.0 consolidates three research-driven delivery cycles into a single

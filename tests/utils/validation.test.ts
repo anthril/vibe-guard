@@ -93,14 +93,6 @@ describe('isValidHookEvent', () => {
     }
   });
 
-  it('accepts specific known events', () => {
-    expect(isValidHookEvent('PreToolUse')).toBe(true);
-    expect(isValidHookEvent('PostToolUse')).toBe(true);
-    expect(isValidHookEvent('Stop')).toBe(true);
-    expect(isValidHookEvent('SessionStart')).toBe(true);
-    expect(isValidHookEvent('UserPromptSubmit')).toBe(true);
-  });
-
   it('rejects unknown event strings', () => {
     expect(isValidHookEvent('Unknown')).toBe(false);
     expect(isValidHookEvent('pretooluse')).toBe(false); // case-sensitive

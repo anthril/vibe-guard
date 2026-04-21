@@ -148,6 +148,8 @@ async function oauthPkceLogin(
   const codeChallenge = crypto.createHash('sha256').update(codeVerifier).digest('base64url');
 
   return new Promise((resolve, reject) => {
+    // use outer-scoped cloudHost
+
     const server = http.createServer(async (req, res) => {
       const url = new URL(req.url ?? '/', `http://localhost`);
       if (url.pathname !== '/callback') {
